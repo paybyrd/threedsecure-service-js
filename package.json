@@ -1,0 +1,30 @@
+{
+  "name": "@paybyrd/threedsecure-service",
+  "version": "1.0.0",
+  "description": "JS service implementation to control the 3DS flow over Paybyrd API",
+  "main": "dist/threedsecure-service.min.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paybyrd/threedsecure-service-js.git"
+  },
+  "scripts": {
+    "prepublish": "uglifyjs src/threedsecure-service.js -c -o dist/threedsecure-service.min.js"
+  },
+  "keywords": [
+    "3ds",
+    "threedsecure",
+    "service",
+    "paybyrd",
+    "acs",
+    "mpi"
+  ],
+  "author": "tiago.resende@paybyrd.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/paybyrd/threedsecure-service-js/issues"
+  },
+  "homepage": "https://github.com/paybyrd/threedsecure-service-js#readme",
+  "devDependencies": {
+    "uglify-js": "^3.16.2"
+  }
+}
