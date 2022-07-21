@@ -102,4 +102,3 @@ const createPaymentResponse = await axios.post(
 ## Flow
 
 ![3DS flow](./images/3DS-flow.svg)
-<img src="./images/3DS-flow.svg">
