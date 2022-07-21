@@ -98,3 +98,8 @@ const createPaymentResponse = await axios.post(
     `https://gateway.paybyrd.com/api/v2/payment?checkoutKey=${checkoutKey}`,
     createPaymentRequest);
 ```
+
+## Flow
+
+![3DS flow](./images/3DS-flow.svg)
+<img src="./images/3DS-flow.svg">
