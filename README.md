@@ -76,6 +76,7 @@ try {
 
 First of all, we truly recommend that you use the 3DS flow using the Order feature, where you can take a look [here](https://docs.paybyrd.com/docs/hosted-form-v2). When you create the order, we will return a **checkoutKey** that must be used for authentication.
 
+```js
 const createPaymentRequest = {
     type: 'Card',
     card: {
@@ -96,5 +97,4 @@ const createPaymentRequest = {
 const createPaymentResponse = await axios.post(
     `https://gateway.paybyrd.com/api/v2/payment?checkoutKey=${checkoutKey}`,
     createPaymentRequest);
-
 ```

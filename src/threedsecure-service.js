@@ -1,10 +1,10 @@
 class ThreeDSecureService {
     constructor({ threeDSecureUrl, container, maxAttempts, attemptDelay, culture, onProgressFn }) {
         this._onProgressFn = onProgressFn;
-        this._maxAttempts = maxAttempts;
-        this._attemptDelay = attemptDelay;
-        this._threeDSecureUrl = threeDSecureUrl;
-        this._culture = culture;
+        this._maxAttempts = maxAttempts || 50;
+        this._attemptDelay = attemptDelay || 2000;
+        this._threeDSecureUrl = threeDSecureUrl || 'https://threedsecure.paybyrd.com';
+        this._culture = culture || 'en-US';
         this._container = container || document.body;
 
         this.IFRAME_DSMETHOD_NAME = 'threeDSMethodIframe';
