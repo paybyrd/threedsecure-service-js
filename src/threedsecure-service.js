@@ -1,11 +1,22 @@
 class ThreeDSecureService {
-    constructor({ threeDSecureUrl, container, maxAttempts, attemptDelay, culture, onProgressFn }) {
+    constructor({
+        threeDSecureUrl,
+        container,
+        maxAttempts,
+        attemptDelay,
+        culture,
+        onProgressFn,
+        onIFrameCreatedFn,
+        onContainerCreatedFn
+    }) {
         this._onProgressFn = onProgressFn;
         this._maxAttempts = maxAttempts || 50;
         this._attemptDelay = attemptDelay || 2000;
         this._threeDSecureUrl = threeDSecureUrl || 'https://threedsecure.paybyrd.com';
         this._culture = culture || 'en-US';
         this._container = container || document.body;
+        this._onIFrameCreatedFn = onIFrameCreatedFn;
+        this._onContainerCreatedFn = onContainerCreatedFn;
 
         this.IFRAME_DSMETHOD_NAME = 'threeDSMethodIframe';
         this.FORM_DSMETHOD_NAME = 'threeDSMethodForm';
@@ -277,6 +288,10 @@ class ThreeDSecureService {
     }
 
     _fixContainer() {
+        if (this._onContainerCreatedFn) {
+            this._onContainerCreatedFn(this._container);
+            return;
+        }
         this._container.setAttribute('style', 'position: relative; overflow: hidden;');
     }
 
@@ -306,7 +321,15 @@ class ThreeDSecureService {
         const iframe = document.createElement('iframe');
         iframe.id = name;
         iframe.name = name;
-        iframe.setAttribute('style', `position: absolute; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%;opacity: ${visible ? '1' : '0'}`);
+
+        if (this._onIFrameCreatedFn) {
+            this._onIFrameCreatedFn(iframe);
+            iframe.style.opacity = visible ? 1 : 0;
+        }
+        else {
+            iframe.setAttribute('style', `border: none;position: absolute; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%;opacity: ${visible ? '1' : '0'}`);
+        }
+
         this._container.appendChild(iframe);
 
         return iframe;
@@ -317,6 +340,7 @@ class ThreeDSecureService {
         const colorDepth = allowedBrowserColorDepth.find(x => x <= screen.colorDepth);
         return {
             javaEnabled: navigator.javaEnabled(),
+            javascriptEnabled: true,
             language: navigator.language,
             userAgent: navigator.userAgent,
             screenWidth: window.screen.width,

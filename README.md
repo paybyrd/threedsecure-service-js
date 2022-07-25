@@ -16,6 +16,8 @@ A library to simplify the implementation of 3DS flow using Paybyrd API.
 * **attemptDelay:** The amount of time in milliseconds to wait for the next attempt when some transient error happens.**DEFAULT: 2000**
 * **culture**: The culture that should be used for API responses.**DEFAULT: en-US**
 * **onProgressFn:** A notification function to identify what is happening inside the service.**DEFAULT: NULL**
+* **onIFrameCreatedFn:** A notification function to allow customizations to the iframe created.
+* **onContainerCreatedFn:** A notification function to allow customizations to the container created. If the container is passed, the function will be dispatched anyway.
 
 
 ```js
