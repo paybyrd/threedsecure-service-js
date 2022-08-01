@@ -1,4 +1,4 @@
-class ThreeDSecureService {
+export default class ThreeDSecureService {
     constructor({
         threeDSecureUrl,
         container,
@@ -48,7 +48,7 @@ class ThreeDSecureService {
 
     create(initiatePayment, correlationId) {
         return this._retry(
-            this._isTransientStatusCode,
+            this._isTransientStatusCode.bind(this),
             () => this._sendRequest({
                 path: '/api/v1',
                 method: 'POST',
@@ -63,7 +63,7 @@ class ThreeDSecureService {
 
     preAuth(preAuthRequest, correlationId) {
         return this._retry(
-            this._isTransientStatusCode,
+            this._isTransientStatusCode.bind(this),
             () => this._sendRequest({
                 path: `/api/v1/${preAuthRequest.id}/preauth`,
                 method: 'POST',
@@ -82,7 +82,7 @@ class ThreeDSecureService {
 
     auth(authRequest, correlationId) {
         return this._retry(
-            this._isTransientStatusCode,
+            this._isTransientStatusCode.bind(this),
             () => this._sendRequest({
                 path: `/api/v1/${authRequest.id}/auth`,
                 method: 'POST',
@@ -104,7 +104,7 @@ class ThreeDSecureService {
 
     postAuth(postAuthRequest, correlationId) {
         return this._retry(
-            this._isTransientStatusCode,
+            this._isTransientStatusCode.bind(this),
             () => this._sendRequest({
                 path: `/api/v1/${postAuthRequest.id}/postAuth`,
                 method: 'POST',
@@ -401,17 +401,11 @@ class ThreeDSecureService {
     }
 
     _onProgress(event) {
-        try {
-            this._onProgressFn?.call(null, event);
-        } catch
-        {
-            // do nothing
-        }
-
+        this._safeExecute(() => this._onProgressFn?.call(null, event));
     }
 
     _isTransientStatusCode(response) {
-        return response.status === 409 || response.status === 424 || response.status === 504;
+        return this._safeExecute(() => response.status == 500 || response.status === 409 || response.status === 424 || response.status === 504, true);
     }
 
     _convertToBase64UriJson(data) {
@@ -429,17 +423,12 @@ class ThreeDSecureService {
             if (json === '') {
                 return null;
             }
-            try {
-                return JSON.parse(json);
-            } catch {
-                return null;
-            }
+            return this._safeExecute(() => JSON.parse(json), null);
         }
 
         return new Promise((resolve, reject) => {
             let xhr = new XMLHttpRequest();
             const url = new URL(path, this._threeDSecureUrl);
-
 
             xhr.open(method, url.toString());
 
@@ -452,17 +441,28 @@ class ThreeDSecureService {
             xhr.setRequestHeader("CorrelationId", correlationId);
 
             xhr.onload = () => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    resolve({
+                try {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        resolve({
+                            status: xhr.status,
+                            data: tryParse(xhr.responseText)
+                        });
+                        return;
+                    }
+                    reject({
                         status: xhr.status,
                         data: tryParse(xhr.responseText)
                     });
-                    return;
                 }
-                reject({
-                    status: xhr.status,
-                    data: tryParse(xhr.responseText)
-                });
+                catch (error) {
+                    console.log(error);
+                    reject({
+                        status: 500,
+                        data: {
+                            message: error.toString()
+                        }
+                    });
+                }
             };
             xhr.onerror = () => {
                 reject({
@@ -471,16 +471,25 @@ class ThreeDSecureService {
                 });
             }
 
-            xhr.send(JSON.stringify(payload));
+            const json = this._safeExecute(() => JSON.stringify(payload), '{}');
+
+            xhr.send(json);
         });
     }
 
     _destroy() {
-        document.getElementById(this.IFRAME_DSMETHOD_NAME)?.remove();
-        document.getElementById(this.FORM_DSMETHOD_NAME)?.remove();
-        document.getElementById(this.IFRAME_CHALLENGE_NAME)?.remove();
-        document.getElementById(this.FORM_CHALLENGE_NAME)?.remove();
+        this._safeExecute(() => document.getElementById(this.IFRAME_DSMETHOD_NAME)?.remove());
+        this._safeExecute(() => document.getElementById(this.FORM_DSMETHOD_NAME)?.remove());
+        this._safeExecute(() => document.getElementById(this.IFRAME_CHALLENGE_NAME)?.remove());
+        this._safeExecute(() => document.getElementById(this.FORM_CHALLENGE_NAME)?.remove());
+    }
+
+    _safeExecute(action, defaultResult) {
+        try {
+            return action();
+        } catch (error) {
+            console.log(error);
+            return defaultResult;
+        }
     }
 }
-
-export default ThreeDSecureService;
