@@ -58,7 +58,8 @@ const request = {
     cardExpiration: '07/30',
     merchantId: 10,
     purchaseAmount: 1,
-    purchaseCurrency: 'EUR'
+    purchaseCurrency: 'EUR',
+    challengeOptions: 'Required'
 }
 
 const threeDSResponse = await threeDSecureService.createAndExecute(request);

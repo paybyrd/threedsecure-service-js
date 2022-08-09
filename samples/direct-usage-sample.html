@@ -118,7 +118,7 @@
 
             const threeDSecureService = new ThreeDSecureService({
                 container,
-                threeDSecureUrl: 'https://threedsecure.paybyrd.com',
+                threeDSecureUrl: 'https://localhost:7139',
                 maxAttempts: 20,
                 attemptDelay: 2000,
                 culture: 'pt-BR',
@@ -151,7 +151,8 @@
                 cardExpiration: expiration.value,
                 merchantId: 10,
                 purchaseAmount: 1,
-                purchaseCurrency: 'EUR'
+                purchaseCurrency: 'EUR',
+                challengeOptions: 'Required'
             };
             const threeDSResponse = await threeDSecureService.createAndExecute(
                 threeDSRequest);
