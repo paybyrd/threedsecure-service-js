@@ -50,6 +50,13 @@ const threeDSService = new ThreeDSecureService({
 * **merchantId:** The merchant id registered to the API.
 * **purchaseAmount:** The purchase amount in cents.
 * **purchaseCurrency:** The purchase currency folowwing the **ISO 4217 format**.
+* **challengeOptions:** Indicator passed to ACS to indicate the configuration for challenge.
+    *  **NoPreference:** Do not use any challenge options
+    *  **NoChallenge:** Try to not require challenge
+    *  **ThreeDSecurePreference:** Let 3DS choose the best option
+    *  **Required:** Require challenge
+           
+    > Sometimes, even when we require the challenge, the ACS will not ask for it, and the flow will run successfully until the end
 
 ```js
 const request = {
