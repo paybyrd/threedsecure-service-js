@@ -405,7 +405,13 @@ export default class ThreeDSecureService {
     }
 
     _isTransientStatusCode(response) {
-        return this._safeExecute(() => response.status == 500 || response.status === 409 || response.status === 424 || response.status === 504, true);
+        return this._safeExecute(() =>
+            response.status === 409
+            || response.status === 424
+            || response.status == 500
+            || response.status == 503
+            || response.status === 504,
+            true);
     }
 
     _convertToBase64UriJson(data) {
@@ -464,12 +470,32 @@ export default class ThreeDSecureService {
                     });
                 }
             };
+
             xhr.onerror = () => {
+                try {
+                    reject({
+                        status: xhr.status,
+                        data: tryParse(xhr.responseText)
+                    });
+                }
+                catch (error) {
+                    reject({
+                        status: 500,
+                        data: {
+                            message: error.toString()
+                        }
+                    });
+                }
+            };
+
+            xhr.ontimeout = () => {
                 reject({
-                    status: xhr.status,
-                    data: tryParse(xhr.responseText)
+                    status: 503,
+                    data: {
+                        message: 'Service timeout'
+                    }
                 });
-            }
+            };
 
             const json = this._safeExecute(() => JSON.stringify(payload), '{}');
 
