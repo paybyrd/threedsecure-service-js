@@ -46,6 +46,25 @@ export default class ThreeDSecureService {
             .finally(this._destroy.bind(this));
     }
 
+    execute(createResponse, correlationId = crypto.randomUUID()) {
+        return this.preAuthWithBrowser(createResponse, correlationId)
+            .then((preAuthResponse) => this.auth(preAuthResponse, correlationId))
+            .then((authResponse) => this.postAuth(authResponse, correlationId))
+            .then(postAuthResponse => {
+                return {
+                    ...postAuthResponse,
+                    correlationId
+                };
+            })
+            .catch(error => {
+                return Promise.reject({
+                    ...error,
+                    correlationId
+                });
+            })
+            .finally(this._destroy.bind(this));
+    }
+
     create(initiatePayment, correlationId) {
         return this._retry(
             this._isTransientStatusCode.bind(this),
@@ -61,11 +80,21 @@ export default class ThreeDSecureService {
             'event:create');
     }
 
+    preAuthWithBrowser(preAuthRequest, correlationId){
+        return this.preAuth({
+            ...preAuthRequest,
+            browser: this._getBrowserData()
+        },
+        correlationId
+        );
+    }
+
     preAuth(preAuthRequest, correlationId) {
         return this._retry(
             this._isTransientStatusCode.bind(this),
             () => this._sendRequest({
                 path: `/api/v1/${preAuthRequest.id}/preauth`,
+                payload: {browser: preAuthRequest.browser},
                 method: 'POST',
                 correlationId
             }),
