@@ -49,7 +49,7 @@ export default class ThreeDSecureService {
     execute(createResponse, correlationId = crypto.randomUUID()) {
         return this.preAuthWithBrowser(createResponse, correlationId)
             .then((preAuthResponse) => this.auth(preAuthResponse, correlationId))
-            .then((authResponse) => this.postAuth(authResponse, correlationId))
+            .then((authResponse) => this.postAuthV2(authResponse, correlationId))
             .then(postAuthResponse => {
                 return {
                     ...postAuthResponse,
@@ -136,6 +136,17 @@ export default class ThreeDSecureService {
             this._isTransientStatusCode.bind(this),
             () => this._sendRequest({
                 path: `/api/v1/${postAuthRequest.id}/postAuth`,
+                method: 'POST',
+                correlationId
+            }),
+            'event:postAuth');
+    }
+
+    postAuthV2(postAuthRequest, correlationId) {
+        return this._retry(
+            this._isTransientStatusCode.bind(this),
+            () => this._sendRequest({
+                path: `/api/v2/${postAuthRequest.id}/postAuth`,
                 method: 'POST',
                 correlationId
             }),
