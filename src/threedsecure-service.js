@@ -111,7 +111,7 @@ export default class ThreeDSecureService {
             this._isTransientStatusCode.bind(this),
             () => this._sendRequest({
                 path: `/api/v1/${preAuthRequest.id}/preauth`,
-                payload: {browser: preAuthRequest.browser},
+                payload: preAuthRequest,
                 method: 'POST',
                 correlationId
             }),
