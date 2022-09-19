@@ -38,10 +38,46 @@ export default class ThreeDSecureService {
                 };
             })
             .catch(error => {
+                this._onProgress({
+                    type: 'event:error',
+                    error
+                });
                 return Promise.reject({
                     ...error,
                     correlationId
                 });
+            })
+            .finally(this._destroy.bind(this));
+    }
+
+    execute(createResponse, correlationId = crypto.randomUUID()) {
+        return this.preAuthWithBrowser(createResponse, correlationId)
+            .then((preAuthResponse) => this.auth(preAuthResponse, correlationId))
+            .then((authResponse) => this.postAuthV2(authResponse, correlationId))
+            .then(postAuthResponse => {
+                return {
+                    ...postAuthResponse,
+                    correlationId
+                };
+            })
+            .catch(error => {
+                this._onProgress({
+                    type: 'event:error',
+                    error
+                });
+                return this.postAuthV2({
+                    ...createResponse
+                }, correlationId)
+                    .catch(error => {
+                        this._onProgress({
+                            type: 'event:error',
+                            error
+                        });
+                        return Promise.reject({
+                            ...error,
+                            correlationId
+                        });
+                    });
             })
             .finally(this._destroy.bind(this));
     }
@@ -61,11 +97,21 @@ export default class ThreeDSecureService {
             'event:create');
     }
 
+    preAuthWithBrowser(preAuthRequest, correlationId){
+        return this.preAuth({
+                ...preAuthRequest,
+                browser: this._getBrowserData()
+            },
+            correlationId
+        );
+    }
+
     preAuth(preAuthRequest, correlationId) {
         return this._retry(
             this._isTransientStatusCode.bind(this),
             () => this._sendRequest({
                 path: `/api/v1/${preAuthRequest.id}/preauth`,
+                payload: preAuthRequest,
                 method: 'POST',
                 correlationId
             }),
@@ -111,6 +157,27 @@ export default class ThreeDSecureService {
                 correlationId
             }),
             'event:postAuth');
+    }
+
+    postAuthV2(postAuthRequest, correlationId) {
+        return this._retry(
+            this._isTransientStatusCode.bind(this),
+            () => this._sendRequest({
+                path: `/api/v2/${postAuthRequest.id}/postAuth`,
+                method: 'POST',
+                correlationId
+            }),
+            'event:postAuth')
+            .then(postAuthResponse => {
+                if (postAuthResponse.status === 'Unauthorized')
+                {
+                    this._onProgress({
+                        type: 'event:error',
+                        error: postAuthResponse
+                    });
+                }
+                return postAuthResponse;
+            });
     }
 
     _executeDsMethod(preAuthResponse) {
@@ -400,7 +467,7 @@ export default class ThreeDSecureService {
         });
     }
 
-    _onProgress(event) {
+    _onProgress(event) {        
         this._safeExecute(() => this._onProgressFn?.call(null, event));
     }
 
