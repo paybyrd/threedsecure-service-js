@@ -51,7 +51,7 @@ export default class ThreeDSecureService {
     }
 
     execute(createResponse, correlationId = crypto.randomUUID()) {
-        return this.preAuthWithBrowser(createResponse, correlationId)
+        return this.preAuthV2(createResponse, correlationId)
             .then((preAuthResponse) => this.auth(preAuthResponse, correlationId))
             .then((authResponse) => this.postAuthV2(authResponse, correlationId))
             .then(postAuthResponse => {
@@ -97,13 +97,26 @@ export default class ThreeDSecureService {
             'event:create');
     }
 
-    preAuthWithBrowser(preAuthRequest, correlationId){
-        return this.preAuth({
-                ...preAuthRequest,
-                browser: this._getBrowserData()
-            },
-            correlationId
-        );
+    preAuthV2(preAuthRequest, correlationId){
+        return this._retry(
+            this._isTransientStatusCode.bind(this),
+            () => this._sendRequest({
+                path: `/api/v2/${preAuthRequest.id}/preauth`,
+                payload: {
+                    browser: this._getBrowserData()
+                },
+                method: 'POST',
+                correlationId
+            }),
+            'event:preAuth'
+        )
+            .then(preAuthResponse => {
+                if (!preAuthResponse.isDsMethodRequired) {
+                    return preAuthResponse;
+                }
+                return this._executeDsMethod(preAuthResponse)
+                    .then(() => preAuthResponse);
+            });
     }
 
     preAuth(preAuthRequest, correlationId) {
@@ -111,7 +124,6 @@ export default class ThreeDSecureService {
             this._isTransientStatusCode.bind(this),
             () => this._sendRequest({
                 path: `/api/v1/${preAuthRequest.id}/preauth`,
-                payload: preAuthRequest,
                 method: 'POST',
                 correlationId
             }),
@@ -169,7 +181,7 @@ export default class ThreeDSecureService {
             }),
             'event:postAuth')
             .then(postAuthResponse => {
-                if (postAuthResponse.status === 'Unauthorized')
+                if (postAuthResponse.status !== 'Authorized')
                 {
                     this._onProgress({
                         type: 'event:error',
