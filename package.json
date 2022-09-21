@@ -8,7 +8,7 @@
     "url": "git+https://github.com/paybyrd/threedsecure-service-js.git"
   },
   "scripts": {
-    "prepublish": "uglifyjs src/threedsecure-service.js -c -o dist/threedsecure-service.min.js",
+    "prepublish": "babel src/threedsecure-service.js --out-dir dist --out-file-extension .min.js",
     "samples": "live-server --open=./samples"
   },
   "keywords": [
@@ -26,7 +26,21 @@
   },
   "homepage": "https://github.com/paybyrd/threedsecure-service-js#readme",
   "devDependencies": {
-    "uglify-js": "^3.16.2",
-    "live-server": "1.2.2"
+    "@babel/cli": "^7.18.10",
+    "@babel/core": "^7.19.1",
+    "@babel/plugin-transform-spread": "^7.19.0",
+    "@babel/preset-env": "^7.19.1",
+    "babel-preset-minify": "^0.5.2",
+    "live-server": "1.2.2",
+    "uglify-js": "^3.16.2"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      "minify"
+    ],
+    "plugins": [
+      "@babel/plugin-transform-spread"
+    ]
   }
 }
