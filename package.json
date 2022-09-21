@@ -42,6 +42,11 @@
         "@babel/preset-env", {
           "modules": false
         }
+      ],
+      [
+        "minify", {
+          "keepFnName": true
+        }
       ]
     ],
     "plugins": [
