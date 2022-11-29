@@ -65,9 +65,7 @@ export default class ThreeDSecureService {
                     type: 'event:error',
                     error
                 });
-                return this.postAuthV2({
-                    ...createResponse
-                }, correlationId)
+                return this.postAuthV2(createResponse, correlationId)
                     .catch(error => {
                         this._onProgress({
                             type: 'event:error',
@@ -97,11 +95,11 @@ export default class ThreeDSecureService {
             'event:create');
     }
 
-    preAuthV2(preAuthRequest, correlationId){
+    preAuthV2({id}, correlationId){
         return this._retry(
             this._isTransientStatusCode.bind(this),
             () => this._sendRequest({
-                path: `/api/v2/${preAuthRequest.id}/preauth`,
+                path: `/api/v2/${id}/preauth`,
                 payload: {
                     browser: this._getBrowserData()
                 },
@@ -112,18 +110,24 @@ export default class ThreeDSecureService {
         )
             .then(preAuthResponse => {
                 if (!preAuthResponse.isDsMethodRequired) {
-                    return preAuthResponse;
+                    return {
+                        id,
+                        ...preAuthResponse
+                    };
                 }
                 return this._executeDsMethod(preAuthResponse)
-                    .then(() => preAuthResponse);
+                    .then(() => ({
+                        id,
+                        ...preAuthResponse
+                    }));
             });
     }
 
-    preAuth(preAuthRequest, correlationId) {
+    preAuth({id}, correlationId) {
         return this._retry(
             this._isTransientStatusCode.bind(this),
             () => this._sendRequest({
-                path: `/api/v1/${preAuthRequest.id}/preauth`,
+                path: `/api/v1/${id}/preauth`,
                 method: 'POST',
                 correlationId
             }),
@@ -131,18 +135,24 @@ export default class ThreeDSecureService {
         )
             .then(preAuthResponse => {
                 if (!preAuthResponse.isDsMethodRequired) {
-                    return preAuthResponse;
+                    return {
+                        id,
+                        ...preAuthResponse
+                    };
                 }
                 return this._executeDsMethod(preAuthResponse)
-                    .then(() => preAuthResponse);
+                    .then(() => ({
+                        id,
+                        ...preAuthResponse
+                    }));
             });
     }
 
-    auth(authRequest, correlationId) {
+    auth({id}, correlationId) {
         return this._retry(
             this._isTransientStatusCode.bind(this),
             () => this._sendRequest({
-                path: `/api/v1/${authRequest.id}/auth`,
+                path: `/api/v1/${id}/auth`,
                 method: 'POST',
                 correlationId
             }),
@@ -150,32 +160,38 @@ export default class ThreeDSecureService {
         )
             .then(authResponse => {
                 if (!authResponse.isChallengeRequired) {
-                    return authResponse;
+                    return {
+                        id,
+                        ...authResponse
+                    };
                 }
                 return (
                     authResponse.challengeVersion === '1.0.0'
                         ? this._executeChallengeV1(authResponse)
                         : this._executeChallengeV2(authResponse))
-                    .then(() => authResponse);
+                    .then(() => ({
+                        id,
+                        ...authResponse
+                    }));
             });
     }
 
-    postAuth(postAuthRequest, correlationId) {
+    postAuth({id}, correlationId) {
         return this._retry(
             this._isTransientStatusCode.bind(this),
             () => this._sendRequest({
-                path: `/api/v1/${postAuthRequest.id}/postAuth`,
+                path: `/api/v1/${id}/postAuth`,
                 method: 'POST',
                 correlationId
             }),
             'event:postAuth');
     }
 
-    postAuthV2(postAuthRequest, correlationId) {
+    postAuthV2({id}, correlationId) {
         return this._retry(
             this._isTransientStatusCode.bind(this),
             () => this._sendRequest({
-                path: `/api/v2/${postAuthRequest.id}/postAuth`,
+                path: `/api/v2/${id}/postAuth`,
                 method: 'POST',
                 correlationId
             }),
