@@ -83,14 +83,15 @@ export default class ThreeDSecureService {
     create(initiatePayment, correlationId) {
         return this._retry(
             this._isTransientStatusCode.bind(this),
-            () => this._sendRequest({
+            attempt => this._sendRequest({
                 path: '/api/v1',
                 method: 'POST',
                 payload: {
                     ...initiatePayment,
                     browser: this._getBrowserData()
                 },
-                correlationId
+                correlationId,
+                attempt
             }),
             'event:create');
     }
@@ -98,13 +99,14 @@ export default class ThreeDSecureService {
     preAuthV2({id}, correlationId){
         return this._retry(
             this._isTransientStatusCode.bind(this),
-            () => this._sendRequest({
+            attempt => this._sendRequest({
                 path: `/api/v2/${id}/preauth`,
                 payload: {
                     browser: this._getBrowserData()
                 },
                 method: 'POST',
-                correlationId
+                correlationId,
+                attempt
             }),
             'event:preAuth'
         )
@@ -119,17 +121,18 @@ export default class ThreeDSecureService {
                     .then(() => ({
                         id,
                         ...preAuthResponse
-                    }));
+                    }));t
             });
     }
 
     preAuth({id}, correlationId) {
         return this._retry(
             this._isTransientStatusCode.bind(this),
-            () => this._sendRequest({
+            attempt => this._sendRequest({
                 path: `/api/v1/${id}/preauth`,
                 method: 'POST',
-                correlationId
+                correlationId,
+                attempt
             }),
             'event:preAuth'
         )
@@ -151,10 +154,11 @@ export default class ThreeDSecureService {
     auth({id}, correlationId) {
         return this._retry(
             this._isTransientStatusCode.bind(this),
-            () => this._sendRequest({
+            attempt => this._sendRequest({
                 path: `/api/v1/${id}/auth`,
                 method: 'POST',
-                correlationId
+                correlationId,
+                attempt
             }),
             'event:auth'
         )
@@ -179,10 +183,11 @@ export default class ThreeDSecureService {
     postAuth({id}, correlationId) {
         return this._retry(
             this._isTransientStatusCode.bind(this),
-            () => this._sendRequest({
+            attempt => this._sendRequest({
                 path: `/api/v1/${id}/postAuth`,
                 method: 'POST',
-                correlationId
+                correlationId,
+                attempt
             }),
             'event:postAuth');
     }
@@ -190,10 +195,11 @@ export default class ThreeDSecureService {
     postAuthV2({id}, correlationId) {
         return this._retry(
             this._isTransientStatusCode.bind(this),
-            () => this._sendRequest({
+            attempt => this._sendRequest({
                 path: `/api/v2/${id}/postAuth`,
                 method: 'POST',
-                correlationId
+                correlationId,
+                attempt
             }),
             'event:postAuth')
             .then(postAuthResponse => {
@@ -519,7 +525,7 @@ export default class ThreeDSecureService {
         return encodedBase64Json;
     }
 
-    _sendRequest({ path, method, payload, correlationId }) {
+    _sendRequest({ path, method, payload, correlationId, attempt }) {
         const tryParse = (json) => {
             if (json === '') {
                 return null;
@@ -540,6 +546,8 @@ export default class ThreeDSecureService {
             xhr.setRequestHeader("Accept-Language", this._culture);
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.setRequestHeader("CorrelationId", correlationId);
+            xhr.setRequestHeader("x-attempt", attempt);
+            xhr.setRequestHeader("x-max-attempt", this._maxAttempts);
 
             xhr.onload = () => {
                 try {
