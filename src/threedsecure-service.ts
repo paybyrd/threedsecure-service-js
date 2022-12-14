@@ -1,4 +1,39 @@
+interface SendRequestParams {
+    path: string,
+    method: string,
+    correlationId: string,
+    attempt: number,
+    payload?: Record<string, any>,
+}
+
+interface Response {
+    status: number;
+    data: Record<string, string>;
+}
+
+interface AuthResponse {
+    challengeUrl: string;
+    processId: string;
+    challengeId: string;
+    challengeVersion: string;
+    preAuthRequest: string;
+    notificationUrl: string;
+}
+
 export default class ThreeDSecureService {
+    _onProgressFn: () => void;
+    _maxAttempts: number;
+    _attemptDelay: number;
+    _threeDSecureUrl: string;
+    _culture: string;
+    _container: HTMLElement;
+    _onIFrameCreatedFn: (iframe: HTMLElement) => void;
+    _onContainerCreatedFn: (container: HTMLElement) => void;
+    IFRAME_DSMETHOD_NAME: string;
+    FORM_DSMETHOD_NAME: string;
+    IFRAME_CHALLENGE_NAME: string;
+    FORM_CHALLENGE_NAME: string;
+
     constructor({
         threeDSecureUrl,
         container,
@@ -26,7 +61,7 @@ export default class ThreeDSecureService {
         this._fixContainer();
     }
 
-    createAndExecute(initiatePayment, correlationId = crypto.randomUUID()) {
+    createAndExecute(initiatePayment: Record<string, string>, correlationId: string = crypto.randomUUID()) {
         return this.create(initiatePayment, correlationId)
             .then((createResponse) => this.preAuth(createResponse, correlationId))
             .then((preAuthResponse) => this.auth(preAuthResponse, correlationId))
@@ -50,7 +85,7 @@ export default class ThreeDSecureService {
             .finally(this._destroy.bind(this));
     }
 
-    execute(createResponse, correlationId = crypto.randomUUID()) {
+    execute(createResponse, correlationId: string = crypto.randomUUID()) {
         return this.preAuthV2(createResponse, correlationId)
             .then((preAuthResponse) => this.auth(preAuthResponse, correlationId))
             .then((authResponse) => this.postAuthV2(authResponse, correlationId))
@@ -80,7 +115,7 @@ export default class ThreeDSecureService {
             .finally(this._destroy.bind(this));
     }
 
-    create(initiatePayment, correlationId) {
+    create(initiatePayment: Record<string, string>, correlationId: string) {
         return this._retry(
             this._isTransientStatusCode.bind(this),
             attempt => this._sendRequest({
@@ -91,12 +126,12 @@ export default class ThreeDSecureService {
                     browser: this._getBrowserData()
                 },
                 correlationId,
-                attempt
+                attempt: Number(attempt)
             }),
             'event:create');
     }
 
-    preAuthV2({id}, correlationId){
+    preAuthV2({ id }: { id: string }, correlationId: string){
         return this._retry(
             this._isTransientStatusCode.bind(this),
             attempt => this._sendRequest({
@@ -106,33 +141,7 @@ export default class ThreeDSecureService {
                 },
                 method: 'POST',
                 correlationId,
-                attempt
-            }),
-            'event:preAuth'
-        )
-            .then(preAuthResponse => {
-                if (!preAuthResponse.isDsMethodRequired) {
-                    return {
-                        id,
-                        ...preAuthResponse
-                    };
-                }
-                return this._executeDsMethod(preAuthResponse)
-                    .then(() => ({
-                        id,
-                        ...preAuthResponse
-                    }));t
-            });
-    }
-
-    preAuth({id}, correlationId) {
-        return this._retry(
-            this._isTransientStatusCode.bind(this),
-            attempt => this._sendRequest({
-                path: `/api/v1/${id}/preauth`,
-                method: 'POST',
-                correlationId,
-                attempt
+                attempt: Number(attempt)
             }),
             'event:preAuth'
         )
@@ -151,14 +160,40 @@ export default class ThreeDSecureService {
             });
     }
 
-    auth({id}, correlationId) {
+    preAuth({ id }: { id: string }, correlationId: string) {
+        return this._retry(
+            this._isTransientStatusCode.bind(this),
+            attempt => this._sendRequest({
+                path: `/api/v1/${id}/preauth`,
+                method: 'POST',
+                correlationId,
+                attempt: Number(attempt)
+            }),
+            'event:preAuth'
+        )
+            .then(preAuthResponse => {
+                if (!preAuthResponse.isDsMethodRequired) {
+                    return {
+                        id,
+                        ...preAuthResponse
+                    };
+                }
+                return this._executeDsMethod(preAuthResponse)
+                    .then(() => ({
+                        id,
+                        ...preAuthResponse
+                    }));
+            });
+    }
+
+    auth({ id }: { id: string }, correlationId: string) {
         return this._retry(
             this._isTransientStatusCode.bind(this),
             attempt => this._sendRequest({
                 path: `/api/v1/${id}/auth`,
                 method: 'POST',
                 correlationId,
-                attempt
+                attempt: Number(attempt)
             }),
             'event:auth'
         )
@@ -180,29 +215,29 @@ export default class ThreeDSecureService {
             });
     }
 
-    postAuth({id}, correlationId) {
+    postAuth({ id }: { id: string }, correlationId: string) {
         return this._retry(
             this._isTransientStatusCode.bind(this),
             attempt => this._sendRequest({
                 path: `/api/v1/${id}/postAuth`,
                 method: 'POST',
                 correlationId,
-                attempt
+                attempt: Number(attempt)
             }),
             'event:postAuth');
     }
 
-    postAuthV2({id}, correlationId) {
+    postAuthV2({ id }: { id: string }, correlationId: string) {
         return this._retry(
             this._isTransientStatusCode.bind(this),
             attempt => this._sendRequest({
                 path: `/api/v2/${id}/postAuth`,
                 method: 'POST',
                 correlationId,
-                attempt
+                attempt: Number(attempt)
             }),
             'event:postAuth')
-            .then(postAuthResponse => {
+            .then((postAuthResponse) => {
                 if (postAuthResponse.status !== 'Authorized')
                 {
                     this._onProgress({
@@ -214,8 +249,8 @@ export default class ThreeDSecureService {
             });
     }
 
-    _executeDsMethod(preAuthResponse) {
-        return new Promise((resolve, reject) => {
+    _executeDsMethod(preAuthResponse: Record<string, string>) {
+        return new Promise<void>((resolve, reject) => {
             try {
                 this._onProgress({
                     type: 'event:dsMethod:start'
@@ -253,8 +288,8 @@ export default class ThreeDSecureService {
         });
     }
 
-    _executeChallengeV1(authResponse) {
-        return new Promise((resolve, reject) => {
+    _executeChallengeV1(authResponse: AuthResponse) {
+        return new Promise<void>((resolve, reject) => {
             try {
                 this._onProgress({
                     type: 'event:challenge:v1:start'
@@ -309,8 +344,8 @@ export default class ThreeDSecureService {
         });
     }
 
-    _executeChallengeV2(authResponse) {
-        return new Promise((resolve, reject) => {
+    _executeChallengeV2(authResponse: AuthResponse) {
+        return new Promise<void>((resolve, reject) => {
             try {
                 this._onProgress({
                     type: 'event:challenge:v2:start'
@@ -368,14 +403,14 @@ export default class ThreeDSecureService {
         });
     }
 
-    _delay(timeout) {
+    _delay(timeout: number) {
         this._onProgress({
             type: 'event:delay:start',
             data: {
                 timeout
             }
         });
-        return new Promise((resolve, _) => {
+        return new Promise<void>((resolve, _) => {
             setTimeout(() => {
                 this._onProgress({
                     type: 'event:delay:end',
@@ -396,7 +431,7 @@ export default class ThreeDSecureService {
         this._container.setAttribute('style', 'position: relative; overflow: hidden;');
     }
 
-    _createForm(name, action, target, method = 'POST') {
+    _createForm(name: string, action: string, target: string, method: string = 'POST') {
         const form = document.createElement('form');
         form.id = name;
         form.name = name;
@@ -408,7 +443,7 @@ export default class ThreeDSecureService {
         return form;
     }
 
-    _createInput(form, name, type) {
+    _createInput(form: HTMLElement, name: string, type: string) {
         const input = document.createElement('input');
         input.id = name;
         input.name = name;
@@ -418,14 +453,14 @@ export default class ThreeDSecureService {
         return input;
     }
 
-    _createIFrame(name, visible = true) {
+    _createIFrame(name: string, visible: boolean = true) {
         const iframe = document.createElement('iframe');
         iframe.id = name;
         iframe.name = name;
 
         if (this._onIFrameCreatedFn) {
             this._onIFrameCreatedFn(iframe);
-            iframe.style.opacity = visible ? 1 : 0;
+            iframe.style.opacity = visible ? '1' : '0';
         }
         else {
             iframe.setAttribute('style', `border: none;position: absolute; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%;opacity: ${visible ? '1' : '0'}`);
@@ -439,6 +474,7 @@ export default class ThreeDSecureService {
     _getBrowserData() {
         const allowedBrowserColorDepth = [48, 32, 24, 16, 15, 8, 4, 1];
         const colorDepth = allowedBrowserColorDepth.find(x => x <= screen.colorDepth);
+
         return {
             javaEnabled: navigator.javaEnabled(),
             javascriptEnabled: true,
@@ -452,9 +488,9 @@ export default class ThreeDSecureService {
         };
     }
 
-    _retry(conditionFn, executeFn, eventType) {
-        return new Promise(async (resolve, reject) => {
-            let response = null;
+    _retry(conditionFn: (response: Response) => unknown, executeFn: (response?: Record<string, string>) => any, eventType: string) {
+        return new Promise<any>(async (resolve, reject) => {
+            let response = {} as Response;
             let attempts = this._maxAttempts;
             do {
                 this._onProgress({
@@ -501,11 +537,11 @@ export default class ThreeDSecureService {
         });
     }
 
-    _onProgress(event) {        
+    _onProgress(event: Record<string, unknown>) {        
         this._safeExecute(() => this._onProgressFn?.call(null, event));
     }
 
-    _isTransientStatusCode(response) {
+    _isTransientStatusCode(response: Response) {
         return this._safeExecute(() =>
             response.status === 409
             || response.status === 424
@@ -515,7 +551,7 @@ export default class ThreeDSecureService {
             true);
     }
 
-    _convertToBase64UriJson(data) {
+    _convertToBase64UriJson(data: Record<string, string>) {
         const json = JSON.stringify(data);
         const base64Json = btoa(json);
         const encodedBase64Json = base64Json
@@ -525,7 +561,7 @@ export default class ThreeDSecureService {
         return encodedBase64Json;
     }
 
-    _sendRequest({ path, method, payload, correlationId, attempt }) {
+    _sendRequest({ path, method, payload, correlationId, attempt }: SendRequestParams) {
         const tryParse = (json) => {
             if (json === '') {
                 return null;
@@ -533,7 +569,7 @@ export default class ThreeDSecureService {
             return this._safeExecute(() => JSON.parse(json), null);
         }
 
-        return new Promise((resolve, reject) => {
+        return new Promise<any>((resolve, reject) => {
             let xhr = new XMLHttpRequest();
             const url = new URL(path, this._threeDSecureUrl);
 
@@ -546,8 +582,8 @@ export default class ThreeDSecureService {
             xhr.setRequestHeader("Accept-Language", this._culture);
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.setRequestHeader("CorrelationId", correlationId);
-            xhr.setRequestHeader("x-attempt", attempt);
-            xhr.setRequestHeader("x-max-attempt", this._maxAttempts);
+            xhr.setRequestHeader("x-attempt", String(attempt));
+            xhr.setRequestHeader("x-max-attempt", String(this._maxAttempts));
 
             xhr.onload = () => {
                 try {
@@ -613,7 +649,7 @@ export default class ThreeDSecureService {
         this._safeExecute(() => document.getElementById(this.FORM_CHALLENGE_NAME)?.remove());
     }
 
-    _safeExecute(action, defaultResult) {
+    _safeExecute(action: () => void, defaultResult?: any) {
         try {
             return action();
         } catch (error) {
