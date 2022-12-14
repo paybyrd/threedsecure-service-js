@@ -9,7 +9,8 @@
     "url": "git+https://github.com/paybyrd/threedsecure-service-js.git"
   },
   "scripts": {
-    "prepublish": "babel src/threedsecure-service.js --out-dir dist --out-file-extension .min.js",
+    "check-types": "tsc",
+    "prepublish": "babel --extensions '.ts' src/threedsecure-service.ts --out-dir dist --out-file-extension .min.js",
     "samples": "live-server --open=./samples"
   },
   "keywords": [
@@ -28,27 +29,38 @@
   "homepage": "https://github.com/paybyrd/threedsecure-service-js#readme",
   "devDependencies": {
     "@babel/cli": "^7.18.10",
+    "@babel/core": "^7.20.5",
+    "@babel/plugin-transform-typescript": "^7.20.2",
     "@babel/preset-env": "^7.19.1",
+    "@babel/preset-typescript": "^7.18.6",
     "babel-plugin-module-resolver": "^4.1.0",
     "babel-preset-minify": "^0.5.2",
-    "live-server": "1.2.2"
+    "live-server": "1.2.2",
+    "typescript": "^4.9.4"
   },
   "babel": {
     "presets": [
       [
-        "@babel/preset-env", {
+        "@babel/preset-env",
+        {
           "modules": false
         }
       ],
       [
-        "minify", {
+        "minify",
+        {
           "keepFnName": true
         }
+      ],
+      [
+        "@babel/typescript"
       ]
     ],
     "plugins": [
+      "@babel/plugin-transform-typescript",
       "@babel/plugin-transform-spread",
       "babel-plugin-module-resolver"
     ]
-  }
+  },
+  "dependencies": {}
 }
