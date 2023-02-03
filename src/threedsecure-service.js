@@ -455,16 +455,16 @@ export default class ThreeDSecureService {
     _retry(conditionFn, executeFn, eventType) {
         return new Promise(async (resolve, reject) => {
             let response = null;
-            let attempts = this._maxAttempts;
+            let attempt = 1;
             do {
                 this._onProgress({
                     type: `${eventType}:start`,
                     data: {
-                        attempt: this._maxAttempts - attempts + 1
+                        attempt
                     }
                 });
                 try {
-                    response = await executeFn();
+                    response = await executeFn(attempt);
                 }
                 catch (error) {
                     this._onProgress({
@@ -486,9 +486,9 @@ export default class ThreeDSecureService {
                     return;
                 }
 
-                attempts--;
+                attempt++;
                 await this._delay(this._attemptDelay);
-            } while (attempts > 0 && conditionFn(response));
+            } while (attempt <= this._maxAttempts && conditionFn(response));
 
             this._onProgress({
                 type: `${eventType}:fail`,

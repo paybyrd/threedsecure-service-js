@@ -1,9 +1,8 @@
 {
   "name": "@paybyrd/threedsecure-service",
-  "version": "1.3.4",
+  "version": "1.3.5",
   "description": "JS service implementation to control the 3DS flow over Paybyrd API",
   "main": "dist/threedsecure-service.min.js",
-  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/paybyrd/threedsecure-service-js.git"
@@ -36,12 +35,14 @@
   "babel": {
     "presets": [
       [
-        "@babel/preset-env", {
+        "@babel/preset-env",
+        {
           "modules": false
         }
       ],
       [
-        "minify", {
+        "minify",
+        {
           "keepFnName": true
         }
       ]
@@ -50,5 +51,8 @@
       "@babel/plugin-transform-spread",
       "babel-plugin-module-resolver"
     ]
+  },
+  "dependencies": {
+    "@paybyrd/threedsecure-service": "^1.3.5"
   }
 }
