@@ -457,33 +457,43 @@ export default class ThreeDSecureService {
             let response = null;
             let attempt = 1;
             do {
-                this._onProgress({
-                    type: `${eventType}:start`,
-                    data: {
-                        attempt
-                    }
-                });
-                try {
-                    response = await executeFn(attempt);
-                }
-                catch (error) {
+                try
+                {
                     this._onProgress({
-                        type: `${eventType}:error`,
-                        error: error.data?.error,
+                        type: `${eventType}:start`,
                         data: {
-                            statusCode: error.status
+                            attempt
                         }
                     });
-                    response = error;
-                }
+                    try {
+                        response = await executeFn(attempt);
+                    }
+                    catch (error) {
+                        this._onProgress({
+                            type: `${eventType}:error`,
+                            error: error.data,
+                            data: {
+                                statusCode: error.status
+                            }
+                        });
+                        response = error;
+                    }
 
-                if (response.status >= 200 && response.status < 300) {
+                    if (response.isSuccess) {
+                        this._onProgress({
+                            type: `${eventType}:success`,
+                            data: response.data.data
+                        });
+                        resolve(response.data.data);
+                        return;
+                    }
+                }
+                catch (error)
+                {
                     this._onProgress({
-                        type: `${eventType}:success`,
-                        data: response.data.data
+                        type: `${eventType}:error`,
+                        error: error
                     });
-                    resolve(response.data.data);
-                    return;
                 }
 
                 attempt++;
@@ -525,85 +535,45 @@ export default class ThreeDSecureService {
         return encodedBase64Json;
     }
 
-    _sendRequest({ path, method, payload, correlationId, attempt }) {
-        const tryParse = (json) => {
-            if (json === '') {
-                return null;
-            }
-            return this._safeExecute(() => JSON.parse(json), null);
+    async _sendRequest({ path, method, payload, correlationId, attempt }) {
+        try
+        {
+            const abortController = new AbortController();
+
+            const timeoutId = setTimeout(() => abortController.abort(), 30000);
+
+            const response = await fetch(`${this._threeDSecureUrl}${path}`, {
+                headers: {
+                    correlationId,
+                    'x-attempt': attempt,
+                    'x-max-attempt': this._maxAttempts,
+                    'accept': 'application/json',
+                    'content-type': 'application/json',
+                    'accept-language': this._culture
+                },
+                keepalive: true,
+                body: JSON.stringify(payload),
+                method,
+                signal: abortController.signal
+            });
+
+            clearTimeout(timeoutId);
+            return {
+                isSuccess: response.ok,
+                status: response.status,
+                data: await response.json()
+            };
         }
-
-        return new Promise((resolve, reject) => {
-            let xhr = new XMLHttpRequest();
-            const url = new URL(path, this._threeDSecureUrl);
-
-            xhr.open(method, url.toString());
-
-            const TIMEOUT_IN_MILLISECONDS = 30000;
-            xhr.timeout = TIMEOUT_IN_MILLISECONDS;
-
-            xhr.setRequestHeader("Accept", "application/json");
-            xhr.setRequestHeader("Accept-Language", this._culture);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.setRequestHeader("CorrelationId", correlationId);
-            xhr.setRequestHeader("x-attempt", attempt);
-            xhr.setRequestHeader("x-max-attempt", this._maxAttempts);
-
-            xhr.onload = () => {
-                try {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        resolve({
-                            status: xhr.status,
-                            data: tryParse(xhr.responseText)
-                        });
-                        return;
-                    }
-                    reject({
-                        status: xhr.status,
-                        data: tryParse(xhr.responseText)
-                    });
-                }
-                catch (error) {
-                    console.log(error);
-                    reject({
-                        status: 500,
-                        data: {
-                            message: error.toString()
-                        }
-                    });
+        catch (error)
+        {
+            return {
+                isSuccess: false,
+                status: 500,
+                data: {
+                    message: error.toString()
                 }
             };
-
-            xhr.onerror = () => {
-                try {
-                    reject({
-                        status: xhr.status,
-                        data: tryParse(xhr.responseText)
-                    });
-                }
-                catch (error) {
-                    reject({
-                        status: 500,
-                        data: {
-                            message: error.toString()
-                        }
-                    });
-                }
-            };
-
-            xhr.ontimeout = () => {
-                reject({
-                    status: 503,
-                    data: {
-                        message: 'Service timeout'
-                    }
-                });
-            };
-
-            const json = this._safeExecute(() => JSON.stringify(payload), '{}');
-
-            xhr.send(json);
-        });
+        }
     }
 
     _destroy() {

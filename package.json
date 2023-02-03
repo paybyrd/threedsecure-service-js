@@ -1,6 +1,6 @@
 {
   "name": "@paybyrd/threedsecure-service",
-  "version": "1.3.5",
+  "version": "2.0.0",
   "description": "JS service implementation to control the 3DS flow over Paybyrd API",
   "main": "dist/threedsecure-service.min.js",
   "repository": {
@@ -53,6 +53,6 @@
     ]
   },
   "dependencies": {
-    "@paybyrd/threedsecure-service": "^1.3.5"
+    "@paybyrd/threedsecure-service": "^2.0.0"
   }
 }
