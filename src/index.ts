@@ -1,4 +1,6 @@
-export { default as ThreeDSecureService } from "./threedsecure-service";
+import ThreeDSecureService from "./threedsecure-service";
+
+export default ThreeDSecureService;
 export {
   ThreeDSecureServiceOptions,
   AuthResponse,
