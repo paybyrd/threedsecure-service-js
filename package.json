@@ -1,14 +1,23 @@
 {
   "name": "@paybyrd/threedsecure-service",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "JS service implementation to control the 3DS flow over Paybyrd API",
-  "main": "dist/threedsecure-service.min.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/paybyrd/threedsecure-service-js.git"
   },
+  "source": "src/index.ts",
+  "exports": {
+    "require": "./dist/index.cjs",
+    "default": "./dist/index.modern.js"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.module.js",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/index.umd.js",
   "scripts": {
-    "prepublish": "babel src/threedsecure-service.js --out-dir dist --out-file-extension .min.js",
+    "build": "microbundle",
+    "start": "microbundle watch",
     "samples": "live-server --open=./samples"
   },
   "keywords": [
@@ -24,5 +33,14 @@
   "bugs": {
     "url": "https://github.com/paybyrd/threedsecure-service-js/issues"
   },
-  "homepage": "https://github.com/paybyrd/threedsecure-service-js#readme"
+  "homepage": "https://github.com/paybyrd/threedsecure-service-js#readme",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "devDependencies": {
+    "microbundle": "^0.15.1",
+    "live-server": "^1.2.2",
+    "typescript": "^4.9.5"
+  }
 }
