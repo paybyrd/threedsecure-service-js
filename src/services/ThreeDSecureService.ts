@@ -30,11 +30,35 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
     }
 
      async execute(request: IExecuteRequest): Promise<IExecuteResponse> {
+        this._logger.log({
+            message: '[Request] PreAuth',
+            content: request
+        });
         let preAuthResponse = await this._preAuth(request);
+        this._logger.log({
+            message: '[Response] PreAuth',
+            content: preAuthResponse
+        });
         await this._directoryServer.execute(preAuthResponse);
+        this._logger.log({
+            message: '[Request] Auth',
+            content: preAuthResponse
+        });
         let authResponse = await this._auth(preAuthResponse);
+        this._logger.log({
+            message: '[Response] Auth',
+            content: authResponse
+        });
         await this._challenge.execute(authResponse);
+        this._logger.log({
+            message: '[Request] PostAuth',
+            content: authResponse
+        });
         let postAuthResponse = await this._postAuth(authResponse);
+        this._logger.log({
+            message: '[Response] PostAuth',
+            content: postAuthResponse
+        });
         return {
             ...postAuthResponse
         };

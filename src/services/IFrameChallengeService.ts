@@ -19,6 +19,12 @@ export class IFrameChallengeService implements IChallengeService {
     execute(authResponse: IAuthResponse): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             try {
+                this._logger.log({
+                    message: '[Request] Challenge execution',
+                    content: {
+                        authResponse
+                    }
+                });
 
                  HtmlElementFactory.createIFrame({
                     parent: this._options.container,
@@ -49,13 +55,31 @@ export class IFrameChallengeService implements IChallengeService {
                     challengeWindowSize: this._options.challengeWindowSize || ChallengeWindowSize.width250xheight400
                 };
 
-                threeDSRequestInput.value = Base64Converter.convert(cReq);
+                const base64CReq = Base64Converter.convert(cReq)
+                threeDSRequestInput.value = base64CReq;
 
                 form.submit();
+
+                this._logger.log({
+                    message: '[Response] Challenge execution',
+                    content: {
+                        authResponse,
+                        cReq,
+                        base64CReq
+                    }
+                });
 
                 resolve();
             }
             catch (error) {
+                this._logger.log({
+                    message: '[Error] Challenge execution',
+                    content: {
+                        authResponse,
+                        error
+                    }
+                });
+
                 return reject({
                     message: error.toString()
                 });

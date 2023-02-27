@@ -24,6 +24,13 @@ export class IFrameDirectoryServerService implements IDirectoryServerService {
 
         return new Promise<void>((resolve, reject) => {
             try {
+                this._logger.log({
+                    message: '[Request] DirectoryServer execution',
+                    content: {
+                        preAuthResponse
+                    }
+                });
+
                 const iframe = HtmlElementFactory.createIFrame({
                     parent: this._options.container,
                     isVisible: false,
@@ -51,13 +58,30 @@ export class IFrameDirectoryServerService implements IDirectoryServerService {
                     threeDSMethodNotificationURL: preAuthResponse.notificationUrl
                 };
 
-                threeDSMethodDataInput.value = Base64Converter.convert(threeDSMethodData);
+                const threeDSMethodDataBase64 = Base64Converter.convert(threeDSMethodData)
+                threeDSMethodDataInput.value = threeDSMethodDataBase64;
 
                 form.submit();
+
+                this._logger.log({
+                    message: '[Response] DirectoryServer execution',
+                    content: {
+                        preAuthResponse,
+                        threeDSMethodDataBase64
+                    }
+                });
 
                 resolve();
             }
             catch (error) {
+                this._logger.log({
+                    message: '[Error] DirectoryServer execution',
+                    content: {
+                        preAuthResponse,
+                        error
+                    }
+                });
+
                 return reject({
                     message: error.toString()
                 });

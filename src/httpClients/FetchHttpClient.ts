@@ -17,6 +17,15 @@ export class FetchHttpClient implements IHttpClient {
             const abortController = new AbortController();
             const timeoutId = setTimeout(() => abortController.abort(), this._options.timeoutInSeconds * 1000);
 
+            this._logger.log({
+                message: '[Request] HttpClient',
+                content: {
+                    request,
+                    attempt,
+                    maxAttempts
+                }
+            });
+
             const response = await fetch(request.url, {
                 headers: {
                     ...request.headers,
@@ -29,6 +38,15 @@ export class FetchHttpClient implements IHttpClient {
                 body: JSON.stringify(request.body),
                 method: request.method,
                 signal: abortController.signal
+            });
+
+            this._logger.log({
+                message: '[Response] HttpClient',
+                content: {
+                    response,
+                    attempt,
+                    maxAttempts
+                }
             });
 
             clearTimeout(timeoutId);
