@@ -41,10 +41,8 @@ export class FetchHttpClient implements IHttpClient {
     }
 
     isTransientError(response: Response): boolean {
-        return response.status === 409
-        || response.status === 424
-        || response.status == 500
-        || response.status == 503
-        || response.status === 504;
+        const TRANSIENT_STATUS = [409, 424, 500, 503, 504];
+
+        return TRANSIENT_STATUS.includes(response.status);
     }
 }
