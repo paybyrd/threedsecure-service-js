@@ -17,6 +17,10 @@ export class IFrameChallengeService implements IChallengeService {
     }
 
     execute(authResponse: IAuthResponse): Promise<void> {
+        if (!authResponse.challengeUrl) {
+            return Promise.resolve();
+        }
+
         return new Promise<void>((resolve, reject) => {
             try {
                 this._logger.log({
