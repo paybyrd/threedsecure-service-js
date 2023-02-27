@@ -24,35 +24,5 @@
   "bugs": {
     "url": "https://github.com/paybyrd/threedsecure-service-js/issues"
   },
-  "homepage": "https://github.com/paybyrd/threedsecure-service-js#readme",
-  "devDependencies": {
-    "@babel/cli": "^7.18.10",
-    "@babel/preset-env": "^7.19.1",
-    "babel-plugin-module-resolver": "^4.1.0",
-    "babel-preset-minify": "^0.5.2",
-    "live-server": "1.2.2"
-  },
-  "babel": {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
-          "modules": false
-        }
-      ],
-      [
-        "minify",
-        {
-          "keepFnName": true
-        }
-      ]
-    ],
-    "plugins": [
-      "@babel/plugin-transform-spread",
-      "babel-plugin-module-resolver"
-    ]
-  },
-  "dependencies": {
-    "@paybyrd/threedsecure-service": "^2.0.0"
-  }
+  "homepage": "https://github.com/paybyrd/threedsecure-service-js#readme"
 }
