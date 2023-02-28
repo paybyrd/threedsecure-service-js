@@ -1,3 +1,5 @@
+import { Buffer } from "buffer/";
+
 export class Base64Converter {
     static convert(data: object) {
         const json = JSON.stringify(data);

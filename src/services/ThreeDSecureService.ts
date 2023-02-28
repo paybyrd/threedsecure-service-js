@@ -3,7 +3,7 @@ import { IHttpClient } from "../httpClients/abstractions";
 import { ConsoleLogger } from "../loggers";
 import { ILogger } from "../loggers/abstractions";
 import { Browser } from "../shared/utils";
-import { IAuthRequest, IAuthResponse, IChallengeService, IDirectoryServerService, IExecuteRequest, IExecuteResponse, IPostAuthRequest, IPostAuthResponse, IThreeDSecureOptions, IThreeDSecureService } from "./abstractions";
+import { IAuthRequest, IAuthResponse, IChallengeService, IDirectoryServerService, IExecuteRequest, IPostAuthRequest, IPostAuthResponse, IThreeDSecureOptions, IThreeDSecureService } from "./abstractions";
 import { IPreAuthRequest } from "./abstractions/IPreAuthRequest";
 import { IPreAuthResponse } from "./abstractions/IPreAuthResponse";
 import { IFrameChallengeService } from "./IFrameChallengeService";
@@ -29,7 +29,7 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
         this._challenge = challenge;
     }
 
-     async execute(request: IExecuteRequest): Promise<IExecuteResponse> {
+     async execute(request: IExecuteRequest): Promise<IPostAuthResponse> {
         this._logger.log({
             message: '[Request] PreAuth',
             content: request
@@ -59,9 +59,7 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
             message: '[Response] PostAuth',
             content: postAuthResponse
         });
-        return {
-            ...postAuthResponse
-        };
+        return postAuthResponse;
      }
 
      _preAuth(request: IPreAuthRequest): Promise<IPreAuthResponse> {
@@ -82,7 +80,7 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
      }
 
      _postAuth(request: IPostAuthRequest): Promise<IPostAuthResponse> {
-        return this._client.send<IAuthResponse>({
+        return this._client.send<IPostAuthResponse>({
             url: `${this._options.threeDSecureUrl}/api/v2/${request.id}/postAuth`,
             method: 'POST'
         });

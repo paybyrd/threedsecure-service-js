@@ -94,7 +94,6 @@
     </div>
 
 
-    <script type="text/javascript" src="https://js.verygoodvault.com/vgs-collect/2.13.0/vgs-collect.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script type="module">
         const apiKey = document.getElementById('api_key');
@@ -105,11 +104,11 @@
         const container = document.getElementsByClassName('container')[0];
         const response = document.getElementById('response');
 
-        import ThreeDSecureService from '../src/threedsecure-service.js';
+        import ThreeDSecureService from '../dist/index.module.js';
 
         const exec = async () => {
             const gatewayClient = axios.create({
-                baseURL: 'https://gateway.paybyrd.com',
+                baseURL: 'https://localhost:44305',
                 headers: {
                     'content-type': 'application/json',
                     'x-api-key': apiKey.value
@@ -118,77 +117,49 @@
 
             const threeDSecureService = new ThreeDSecureService({
                 container,
-                threeDSecureUrl: 'https://threedsecure.paybyrd.com',
+                threeDSecureUrl: 'https://threedsecuresandbox.paybyrd.com',
                 maxAttempts: 20,
                 attemptDelay: 2000,
-                culture: 'pt-BR',
-                onProgressFn: (event) => console.log(event)
+                culture: 'pt-BR'
             });
 
-            /* CREATE ORDER - Start */
-            const createOrderRequest = {
-                amount: '0.01',
-                currency: 'EUR',
-                orderRef: '3ds-flow-test'
-            }
+            /* CREATE TRANSACTION - Start */
+            const createTransactionRequest = {
+                type:"Card",
+                amount: "1.00",
+                currency: "EUR",
+                card:{
+                    number:"5448280000000007",
+                    expiration:"12/25",
+                    cvv:"123",
+                    holder:"Jane Jones"
+                }   
+            };
 
-            const orderResponse = await gatewayClient.post('/api/v2/orders', createOrderRequest);
+            const transactionResponse = await gatewayClient.post('/api/v2/payment', createTransactionRequest);
 
-            if (orderResponse.status >= 300) {
-                response.innerText = JSON.stringify(orderResponse.data);
+            console.log(transactionResponse);
+
+            if (transactionResponse.status >= 300) {
+                response.innerText = JSON.stringify(transactionResponse.data);
                 return;
             }
 
-            const { checkoutKey } = orderResponse.data;
+            const transaction = transactionResponse.data;
 
-            /* CREATE ORDER - End */
+            /* CREATE Transaction - End */
 
             /* EXECUTE 3DS - Start */
 
             const threeDSRequest = {
-                cardNumber: cardNumber.value,
-                cardHolder: holderName.value,
-                cardExpiration: expiration.value,
-                merchantId: 10,
-                purchaseAmount: 1,
-                purchaseCurrency: 'EUR',
-                challengeOptions: 'Required'
+                id: transaction.threeDSecure.id,
+                correlationId: transaction.requestId
             };
-            const threeDSResponse = await threeDSecureService.createAndExecute(
-                threeDSRequest);
+            const threeDSResponse = await threeDSecureService.execute(threeDSRequest);
 
             /* EXECUTE 3DS - End */
 
-            /* CREATE PAYMENT - Start */
-
-            const createPaymentRequest = {
-                type: 'Card',
-                card: {
-                    number: cardNumber.value,
-                    holder: holderName.value,
-                    expiration: expiration.value,
-                    cvv: cvv.value,
-                    threeDSVersion: threeDSResponse.version,
-                    aav: threeDSResponse.authenticationValue,
-                    caav_algorithm: threeDSResponse.authenticationValueAlgorithm,
-                    dsTransactionId: threeDSResponse.dsTransactionId,
-                    eci: threeDSResponse.eci,
-                    xid: threeDSResponse.xid,
-                    verificationMethod: threeDSResponse.verificationMethod
-                }
-            };
-
-            const createPaymentResponse = await gatewayClient.post(
-                `/api/v2/payment?checkoutKey=${checkoutKey}`,
-                createPaymentRequest,
-                {
-                    headers: {
-                        correlationId: threeDSResponse.correlationId
-                    }
-                });
-
-            /* CREATE PAYMENT - End */
-            response.innerHTML = JSON.stringify(createPaymentResponse);
+            response.innerHTML = JSON.stringify(threeDSResponse);
         }
 
         const form = document.getElementById('form');

@@ -39,8 +39,11 @@
     "src"
   ],
   "devDependencies": {
-    "microbundle": "^0.15.1",
     "live-server": "^1.2.2",
+    "microbundle": "^0.15.1",
     "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "buffer": "^6.0.3"
   }
 }

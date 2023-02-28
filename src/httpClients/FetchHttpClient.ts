@@ -10,12 +10,15 @@ export class FetchHttpClient implements IHttpClient {
     constructor(options: IHttpClientOptions, logger: ILogger, retryPolicy: IRetryPolicy = new LinearRetryPolicy(options, logger)) {
         this._retryPolicy = retryPolicy;
         this._logger = logger;
+        this._options = options;
     }
     
     async send<T>(request: IRequest): Promise<T> {
+        const self = this;
         return await this._retryPolicy.execute<T>(async ({attempt, maxAttempts}) => {
+            const timeout = (self._options.timeoutInSeconds || 30) * 1000;
             const abortController = new AbortController();
-            const timeoutId = setTimeout(() => abortController.abort(), this._options.timeoutInSeconds * 1000);
+            const timeoutId = setTimeout(() => abortController.abort(), timeout);
 
             this._logger.log({
                 message: '[Request] HttpClient',
@@ -50,10 +53,11 @@ export class FetchHttpClient implements IHttpClient {
             });
 
             clearTimeout(timeoutId);
+            const result = await response.json();
             return {
                 isSuccess: response.ok,
                 isTransientError: this.isTransientError(response),
-                data: await response.json()
+                data: response.ok ? result.data : result
             };
         }, `[${request.method}] ${request.url}`);
     }

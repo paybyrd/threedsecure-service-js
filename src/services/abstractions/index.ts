@@ -6,7 +6,6 @@ import { IChallengeService } from "./IChallengeService";
 import { IDirectoryServerOptions } from "./IDirectoryServerOptions";
 import { IDirectoryServerService } from "./IDirectoryServerServices";
 import { IExecuteRequest } from "./IExecuteRequest";
-import { IExecuteResponse } from "./IExecuteResponse";
 import { IPostAuthRequest } from "./IPostAuthRequest";
 import { IPostAuthResponse } from "./IPostAuthResponse";
 import { IThreeDSecureOptions } from "./IThreeDSecureOptions";
@@ -21,7 +20,6 @@ export {
     IChallengeService,
     IDirectoryServerService,
     IExecuteRequest,
-    IExecuteResponse,
     IPostAuthRequest,
     IPostAuthResponse,
     IThreeDSecureService,
