@@ -1,4 +1,4 @@
-import { IPreAuthResponse } from "./IPreAuthResponse";
+import { IDirectoryServerExecute } from "./IDirectoryServerExecute";
 export interface IDirectoryServerService {
-    execute(preAuthResponse: IPreAuthResponse): Promise<void>;
+    execute(request: IDirectoryServerExecute): Promise<void>;
 }

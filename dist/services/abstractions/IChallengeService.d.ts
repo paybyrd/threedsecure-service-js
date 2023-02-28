@@ -1,4 +1,4 @@
-import { IAuthResponse } from "./IAuthResponse";
+import { IChallengeExecute } from "./IChallengeExecute";
 export interface IChallengeService {
-    execute(authResponse: IAuthResponse): Promise<void>;
+    execute(request: IChallengeExecute): Promise<void>;
 }

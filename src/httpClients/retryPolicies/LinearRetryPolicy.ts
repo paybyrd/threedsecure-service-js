@@ -1,7 +1,7 @@
 import { ILogger, LogLevel } from "../../loggers/abstractions";
 import { IError } from "../../shared/abstractions";
 import { Delay } from "../../shared/utils";
-import { ExecuteFunction, IRetryExecution, IRetryOptions, IRetryPolicy } from "../abstractions";
+import { IRetryExecution, IRetryOptions, IRetryPolicy } from "../abstractions";
 
 export class LinearRetryPolicy implements IRetryPolicy {
     private readonly _options: IRetryOptions;

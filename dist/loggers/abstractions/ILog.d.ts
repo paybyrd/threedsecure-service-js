@@ -1,4 +1,9 @@
-import { IError } from "../../shared/abstractions/IError";
-export interface ILog extends IError {
+import { LogLevel } from "./LogLevel";
+export interface ILog {
+    method: string;
+    correlationId: string;
+    level: LogLevel;
+    message: string;
     content?: object;
+    error?: object;
 }
