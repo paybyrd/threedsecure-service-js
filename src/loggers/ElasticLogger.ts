@@ -21,10 +21,12 @@ interface IFullLog {
 }
 
 export class ElasticLogger implements ILogger {
+    private static readonly DEFAULT_BATCH_TIMEOUT = 5;
     private readonly _httpClient: IHttpClient;
     private readonly _logger: ILogger;
     private readonly _options: IElasticLoggerOptions;
     private _logs: Array<IFullLog> = [];
+    private _interval: NodeJS.Timer;
 
     constructor(options: IElasticLoggerOptions,
         logger: ILogger = new ConsoleLogger(),
@@ -35,7 +37,7 @@ export class ElasticLogger implements ILogger {
         this._logger = logger;
         this._options = options;
         this._httpClient = httpClient;
-        setInterval(this.sendBatch.bind(this), 1000);
+        this._interval = setInterval(this.sendBatch.bind(this), (this._options.batchLogIntervalInSeconds || ElasticLogger.DEFAULT_BATCH_TIMEOUT) * 1000);
     }
 
     log(log: ILog): void {
@@ -60,6 +62,14 @@ export class ElasticLogger implements ILogger {
             content: log.content,
             level: log.level
         });
+    }
+
+    async flush(): Promise<void> {
+        clearInterval(this._interval);
+        while (this._logs.length) {
+            await this.sendBatch();
+        }
+        this._interval = setInterval(this.sendBatch.bind(this), (this._options.batchLogIntervalInSeconds || ElasticLogger.DEFAULT_BATCH_TIMEOUT) * 1000);
     }
 
     async sendBatch() : Promise<void> {
