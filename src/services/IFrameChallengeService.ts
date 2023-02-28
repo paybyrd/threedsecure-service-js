@@ -1,6 +1,6 @@
-import { ILogger } from "../loggers/abstractions";
+import { ILogger, LogLevel } from "../loggers/abstractions";
 import { Base64Converter, HtmlElementFactory } from "../shared/utils";
-import { ChallengeWindowSize, IAuthResponse, IChallengeOptions, IChallengeService } from "./abstractions";
+import { ChallengeWindowSize, IChallengeExecute, IChallengeOptions, IChallengeService } from "./abstractions";
 
 export class IFrameChallengeService implements IChallengeService {
     private static readonly IFRAME_NAME = 'challengeIframe';
@@ -16,8 +16,8 @@ export class IFrameChallengeService implements IChallengeService {
         this._logger = logger;
     }
 
-    execute(authResponse: IAuthResponse): Promise<void> {
-        if (!authResponse.challengeUrl) {
+    execute(request: IChallengeExecute): Promise<void> {
+        if (!request.authResponse.challengeUrl) {
             return Promise.resolve();
         }
 
@@ -26,8 +26,11 @@ export class IFrameChallengeService implements IChallengeService {
                 this._logger.log({
                     message: '[Request] Challenge execution',
                     content: {
-                        authResponse
-                    }
+                        authResponse: request.authResponse
+                    },
+                    method: "executeChallenge",
+                    correlationId: request.correlationId,
+                    level: LogLevel.Information
                 });
 
                  HtmlElementFactory.createIFrame({
@@ -40,7 +43,7 @@ export class IFrameChallengeService implements IChallengeService {
                 const form = HtmlElementFactory.createForm({
                     parent: this._options.container,
                     name: IFrameChallengeService.FORM_NAME,
-                    actionUrl: authResponse.challengeUrl,
+                    actionUrl: request.authResponse.challengeUrl,
                     target: IFrameChallengeService.IFRAME_NAME,
                     method: 'post'
                 });
@@ -52,9 +55,9 @@ export class IFrameChallengeService implements IChallengeService {
                 });
 
                 const cReq = {
-                    threeDSServerTransID: authResponse.processId,
-                    acsTransID: authResponse.challengeId,
-                    messageVersion: authResponse.challengeVersion,
+                    threeDSServerTransID: request.authResponse.processId,
+                    acsTransID: request.authResponse.challengeId,
+                    messageVersion: request.authResponse.challengeVersion,
                     messageType: "CReq",
                     challengeWindowSize: this._options.challengeWindowSize || ChallengeWindowSize.width250xheight400
                 };
@@ -67,10 +70,13 @@ export class IFrameChallengeService implements IChallengeService {
                 this._logger.log({
                     message: '[Response] Challenge execution',
                     content: {
-                        authResponse,
+                        authResponse: request.authResponse,
                         cReq,
                         base64CReq
-                    }
+                    },
+                    method: "executeChallenge",
+                    correlationId: request.correlationId,
+                    level: LogLevel.Information
                 });
 
                 resolve();
@@ -79,9 +85,12 @@ export class IFrameChallengeService implements IChallengeService {
                 this._logger.log({
                     message: '[Error] Challenge execution',
                     content: {
-                        authResponse,
+                        authResponse: request.authResponse,
                         error
-                    }
+                    },
+                    method: "executeChallenge",
+                    correlationId: request.correlationId,
+                    level: LogLevel.Error
                 });
 
                 return reject({

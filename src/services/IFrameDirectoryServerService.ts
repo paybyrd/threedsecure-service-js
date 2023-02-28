@@ -1,7 +1,6 @@
-import { ILogger } from "../loggers/abstractions";
+import { ILogger, LogLevel } from "../loggers/abstractions";
 import { Base64Converter, HtmlElementFactory } from "../shared/utils";
-import { IDirectoryServerOptions, IDirectoryServerService } from "./abstractions";
-import { IPreAuthResponse } from "./abstractions/IPreAuthResponse";
+import { IDirectoryServerExecute, IDirectoryServerOptions, IDirectoryServerService } from "./abstractions";
 
 export class IFrameDirectoryServerService implements IDirectoryServerService {
     private static readonly IFRAME_NAME: string = 'threeDSMethodIframe';
@@ -17,8 +16,8 @@ export class IFrameDirectoryServerService implements IDirectoryServerService {
         this._options = options;
     }
 
-    execute(preAuthResponse: IPreAuthResponse) : Promise<void> {
-        if (!preAuthResponse.dsMethodUrl) {
+    execute(request: IDirectoryServerExecute) : Promise<void> {
+        if (!request.preAuthResponse.dsMethodUrl) {
             return Promise.resolve();
         }        
 
@@ -26,9 +25,10 @@ export class IFrameDirectoryServerService implements IDirectoryServerService {
             try {
                 this._logger.log({
                     message: '[Request] DirectoryServer execution',
-                    content: {
-                        preAuthResponse
-                    }
+                    content: request,
+                    method: "directoryServerExecute",
+                    correlationId: request.correlationId,
+                    level: LogLevel.Information
                 });
 
                 const iframe = HtmlElementFactory.createIFrame({
@@ -42,7 +42,7 @@ export class IFrameDirectoryServerService implements IDirectoryServerService {
                 const form = HtmlElementFactory.createForm({
                     parent: this._options.container,
                     name: IFrameDirectoryServerService.FORM_NAME,
-                    actionUrl: preAuthResponse.dsMethodUrl,
+                    actionUrl: request.preAuthResponse.dsMethodUrl,
                     target: IFrameDirectoryServerService.IFRAME_NAME,
                     method: 'POST'
                 });
@@ -54,8 +54,8 @@ export class IFrameDirectoryServerService implements IDirectoryServerService {
                 });
 
                 const threeDSMethodData = {
-                    threeDSServerTransID: preAuthResponse.processId,
-                    threeDSMethodNotificationURL: preAuthResponse.notificationUrl
+                    threeDSServerTransID: request.preAuthResponse.processId,
+                    threeDSMethodNotificationURL: request.preAuthResponse.notificationUrl
                 };
 
                 const threeDSMethodDataBase64 = Base64Converter.convert(threeDSMethodData)
@@ -66,9 +66,12 @@ export class IFrameDirectoryServerService implements IDirectoryServerService {
                 this._logger.log({
                     message: '[Response] DirectoryServer execution',
                     content: {
-                        preAuthResponse,
+                        request,
                         threeDSMethodDataBase64
-                    }
+                    },
+                    method: "directoryServerExecute",
+                    correlationId: request.correlationId,
+                    level: LogLevel.Information
                 });
 
                 resolve();
@@ -77,9 +80,12 @@ export class IFrameDirectoryServerService implements IDirectoryServerService {
                 this._logger.log({
                     message: '[Error] DirectoryServer execution',
                     content: {
-                        preAuthResponse,
+                        request,
                         error
-                    }
+                    },
+                    method: "directoryServerExecute",
+                    correlationId: request.correlationId,
+                    level: LogLevel.Error
                 });
 
                 return reject({

@@ -1,5 +1,5 @@
-import { ExecuteFunction } from "./ExecuteFunction";
+import { IRetryExecution } from "./IRetryExecution";
 
 export interface IRetryPolicy {
-    execute<T>(executeFn: ExecuteFunction<T>, method: string) : Promise<T>;
+    execute<T>(request: IRetryExecution<T>) : Promise<T>;
 }

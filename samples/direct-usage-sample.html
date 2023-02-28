@@ -72,22 +72,15 @@
             <input type="text" id="api_key" class="field-wrapper">
         </div>
         <div>
-            <label>Cardholder Name:</label>
-            <input type="text" id="holder" class="field-wrapper">
-        </div>
-        <div>
-            <label>Card number:</label>
-            <input type="text" id="number" class="field-wrapper">
-        </div>
-        <div>
-            <label>Expiration Date:</label>
-            <input type="text" id="expiration" class="field-wrapper">
-        </div>
-        <div>
-            <label>Card Security Code:</label>
-            <input type="text" id="cvv" class="field-wrapper">
+            <label>Card scenario</label>
+            <label for="card_number_0007"><input type="radio" name="card_number" id="card_number_0007" value="5448280000000007">Payment Success</label>
+            <label for="card_number_0119"><input type="radio" name="card_number" id="card_number_0119" value="4000000000000119">Payment Error</label>
+            <label for="card_number_5515"><input type="radio" name="card_number" id="card_number_5515" value="5201282999005515">Payment Timeout</label>
+            <label for="card_number_4642"><input type="radio" name="card_number" id="card_number_4642" value="5505772716954642">3DS Not enrolled</label>
+            <label for="card_number_4209"><input type="radio" name="card_number" id="card_number_4209" value="2720290928104209">3DS Unauthorized</label>
         </div>
         <button id="send" type="submit">Submit</button>
+        <button id="reset" type="reset">Reset</button>
         <pre id="response"></pre>
     </form>
     <div class="container">
@@ -97,10 +90,6 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script type="module">
         const apiKey = document.getElementById('api_key');
-        const cardNumber = document.getElementById('number');
-        const holderName = document.getElementById('holder');
-        const expiration = document.getElementById('expiration');
-        const cvv = document.getElementById('cvv');
         const container = document.getElementsByClassName('container')[0];
         const response = document.getElementById('response');
 
@@ -118,22 +107,25 @@
             const threeDSecureService = new ThreeDSecureService({
                 container,
                 threeDSecureUrl: 'https://threedsecuresandbox.paybyrd.com',
+                elasticLoggerUrl: 'http://127.0.0.1:7071/api/v1',
                 maxAttempts: 20,
                 attemptDelay: 2000,
                 culture: 'pt-BR'
             });
 
-            /* CREATE TRANSACTION - Start */
+            /* We highly recommend that you make this request through your backend,
+               and then pass the ThreeDSecureId to the client in order to it execute
+               the 3DS flow properly */
             const createTransactionRequest = {
                 type:"Card",
                 amount: "1.00",
                 currency: "EUR",
                 card:{
-                    number:"5448280000000007",
-                    expiration:"12/25",
+                    number: document.querySelector('input[name="card_number"]:checked').value,
+                    expiration:"12/30",
                     cvv:"123",
                     holder:"Jane Jones"
-                }   
+                }
             };
 
             const transactionResponse = await gatewayClient.post('/api/v2/payment', createTransactionRequest);
@@ -141,7 +133,7 @@
             console.log(transactionResponse);
 
             if (transactionResponse.status >= 300) {
-                response.innerText = JSON.stringify(transactionResponse.data);
+                response.innerText = JSON.stringify(transactionResponse.data, null, 4);
                 return;
             }
 
@@ -159,7 +151,7 @@
 
             /* EXECUTE 3DS - End */
 
-            response.innerHTML = JSON.stringify(threeDSResponse);
+            response.innerHTML = JSON.stringify(threeDSResponse, null, 4);
         }
 
         const form = document.getElementById('form');
@@ -167,6 +159,10 @@
             event.preventDefault();
             await exec();
         });
+        form.addEventListener('reset', (event) => {
+            event.preventDefault();
+            window.location.reload();
+        })
     </script>
 </body>
 

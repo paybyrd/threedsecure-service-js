@@ -4,6 +4,7 @@ import { IRetryOptions } from "./IRetryOptions";
 import { ExecuteFunction } from "./ExecuteFunction";
 import { IRequest } from "./IRequest";
 import { IHttpClientOptions } from "./IHttpClientOptions";
+import { IRetryExecution } from "./IRetryExecution";
 
 export {
     IHttpClient,
@@ -11,5 +12,6 @@ export {
     IRetryOptions,
     IHttpClientOptions,
     ExecuteFunction,
-    IRequest
+    IRequest,
+    IRetryExecution
 };

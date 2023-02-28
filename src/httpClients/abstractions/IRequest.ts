@@ -3,4 +3,5 @@ export interface IRequest {
     body?: object;
     method: 'GET' | 'POST';
     headers?: object;
+    correlationId: string;
 }

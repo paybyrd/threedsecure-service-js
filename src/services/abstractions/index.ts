@@ -1,8 +1,10 @@
 import { ChallengeWindowSize } from "./ChallengeWindowSize";
 import { IAuthRequest } from "./IAuthRequest";
 import { IAuthResponse } from "./IAuthResponse";
+import { IChallengeExecute } from "./IChallengeExecute";
 import { IChallengeOptions } from "./IChallengeOptions";
 import { IChallengeService } from "./IChallengeService";
+import { IDirectoryServerExecute } from "./IDirectoryServerExecute";
 import { IDirectoryServerOptions } from "./IDirectoryServerOptions";
 import { IDirectoryServerService } from "./IDirectoryServerServices";
 import { IExecuteRequest } from "./IExecuteRequest";
@@ -23,5 +25,7 @@ export {
     IPostAuthRequest,
     IPostAuthResponse,
     IThreeDSecureService,
-    IThreeDSecureOptions
+    IThreeDSecureOptions,
+    IDirectoryServerExecute,
+    IChallengeExecute
 };
