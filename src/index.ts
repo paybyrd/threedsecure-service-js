@@ -4,9 +4,8 @@ import * as Loggers from "./loggers";
 import * as Services from "./services";
 import * as Shared from "./shared";
 
-export default ThreeDSecureService;
-
 export {
+    ThreeDSecureService,
     HttpClients,
     Loggers,
     Services,

@@ -93,7 +93,9 @@
         const container = document.getElementsByClassName('container')[0];
         const response = document.getElementById('response');
 
-        import ThreeDSecureService from '../dist/index.module.js';
+        import {
+            ThreeDSecureService
+         } from '../dist/index.module.js';
 
         const exec = async () => {
             const gatewayClient = axios.create({
@@ -102,15 +104,6 @@
                     'content-type': 'application/json',
                     'x-api-key': apiKey.value
                 }
-            });
-
-            const threeDSecureService = new ThreeDSecureService({
-                container,
-                threeDSecureUrl: 'https://threedsecuresandbox.paybyrd.com',
-                elasticLoggerUrl: 'http://127.0.0.1:7071/api/v1',
-                maxAttempts: 20,
-                attemptDelay: 2000,
-                culture: 'pt-BR'
             });
 
             /* We highly recommend that you make this request through your backend,
@@ -142,6 +135,16 @@
             /* CREATE Transaction - End */
 
             /* EXECUTE 3DS - Start */
+
+            const threeDSecureService = new ThreeDSecureService({
+                container,
+                threeDSecureUrl: 'https://threedsecuresandbox.paybyrd.com',
+                elasticLoggerUrl: 'http://127.0.0.1:7071/api/v1',
+                maxAttempts: 20,
+                attemptDelay: 2000,
+                culture: 'pt-BR',
+                apiKey: transaction.threeDSecure.apiKey
+            });
 
             const threeDSRequest = {
                 id: transaction.threeDSecure.id,

@@ -58,7 +58,10 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
             body: {
                 browser: Browser.create()
             },
-            correlationId: request.correlationId
+            correlationId: request.correlationId,
+            headers: {
+                'x-api-key': this._options.apiKey
+            }
         });
      }
 
@@ -73,7 +76,10 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
         return this._client.send<IAuthResponse>({
             url: `${this._options.threeDSecureUrl}/api/v1/${request.id}/auth`,
             method: 'POST',
-            correlationId: request.correlationId
+            correlationId: request.correlationId,
+            headers: {
+                'x-api-key': this._options.apiKey
+            }
         });
      }
 
@@ -88,7 +94,10 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
         return this._client.send<IPostAuthResponse>({
             url: `${this._options.threeDSecureUrl}/api/v2/${request.id}/postAuth`,
             method: 'POST',
-            correlationId: request.correlationId
+            correlationId: request.correlationId,
+            headers: {
+                'x-api-key': this._options.apiKey
+            }
         });
      }
  }

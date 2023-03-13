@@ -83,7 +83,10 @@ export class ElasticLogger implements ILogger {
                 url: this._options.elasticLoggerUrl,
                 method: 'POST',
                 body: logs,
-                correlationId
+                correlationId,
+                headers: {
+                    'x-api-key': this._options.apiKey
+                }
             });
         } catch (error) {
             this._logger.log({
