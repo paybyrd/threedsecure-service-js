@@ -31,6 +31,8 @@ export class IFrameDirectoryServerService implements IDirectoryServerService {
                     level: LogLevel.Information
                 });
 
+                this._options.container.innerHTML = '';
+
                 const iframe = HtmlElementFactory.createIFrame({
                     parent: this._options.container,
                     isVisible: false,

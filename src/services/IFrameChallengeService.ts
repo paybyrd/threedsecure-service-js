@@ -33,7 +33,9 @@ export class IFrameChallengeService implements IChallengeService {
                     level: LogLevel.Information
                 });
 
-                 HtmlElementFactory.createIFrame({
+                this._options.container.innerHTML = '';
+
+                HtmlElementFactory.createIFrame({
                     parent: this._options.container,
                     name: IFrameChallengeService.IFRAME_NAME,
                     isVisible: true,
