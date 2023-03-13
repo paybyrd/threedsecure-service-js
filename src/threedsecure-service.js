@@ -225,6 +225,8 @@ export default class ThreeDSecureService {
                 const inputName = 'threeDSMethodData';
                 const inputType = 'hidden';
 
+                this._container.innerHTML = '';
+
                 this._createIFrame(iframeName, false);
                 const form = this._createForm(formName, preAuthResponse.dsMethodUrl, iframeName);
                 const threeDSMethodDataInput = this._createInput(form, inputName, inputType);
@@ -265,6 +267,8 @@ export default class ThreeDSecureService {
                 const paReqInputName = 'PaReq';
                 const termUrlInputName = 'TermUrl';
                 const inputType = 'hidden';
+
+                this._container.innerHTML = '';
 
                 this._createIFrame(iframeName);
                 const form = this._createForm(
@@ -321,6 +325,8 @@ export default class ThreeDSecureService {
                 const threeDSSessionDataInputName = 'threeDSSessionData';
                 const threeDSRequestInputName = 'creq';
                 const inputType = 'hidden';
+
+                this._container.innerHTML = '';
 
                 this._createIFrame(iframeName);
                 const form = this._createForm(
