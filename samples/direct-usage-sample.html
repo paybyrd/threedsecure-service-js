@@ -1,202 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<style>
+			html,
+			body {
+				width: 100%;
+				height: 100vh;
+				padding: 0;
+				margin: 0;
+			}
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-        html,
-        body {
-            width: 100%;
-            height: 100vh;
-            padding: 0;
-            margin: 0;
-        }
+			.container {
+				width: 90%;
+				height: inherit;
+				margin: 0 auto;
+				background-color: gray;
+			}
 
-        .container {
-            width: 90%;
-            height: inherit;
-            margin: 0 auto;
-            background-color: gray;
-        }
+			* {
+				box-sizing: border-box;
+			}
 
-        * {
-            box-sizing: border-box;
-        }
+			html {
+				font-family: "Arial", sans-serif;
+			}
 
-        html {
-            font-family: "Arial", sans-serif;
-        }
+			iframe {
+				width: 100%;
+				height: 100%;
+			}
 
-        iframe {
-            width: 100%;
-            height: 100%;
-        }
+			form {
+				width: 100%;
+				max-width: 500px;
+			}
 
-        form {
-            width: 100%;
-            max-width: 500px;
-        }
+			label {
+				margin-bottom: 8px;
+				display: block;
+				color: #40545f;
+				font-size: 14px;
+				font-weight: 700;
+			}
 
-        label {
-            margin-bottom: 8px;
-            display: block;
-            color: #40545F;
-            font-size: 14px;
-            font-weight: 700;
-        }
+			.field-wrapper {
+				margin-bottom: 16px;
+				width: 100%;
+				height: 40px;
+				padding-top: 6px;
+				padding-right: 12px;
+				padding-bottom: 6px;
+				padding-left: 12px;
+				box-shadow: 0px 0px 3px rgba(23, 31, 39, 0.3);
+				border-width: 1px;
+				border-color: transparent;
+				border-style: solid;
+				border-radius: 4px;
+			}
+		</style>
+	</head>
 
-        .field-wrapper {
-            margin-bottom: 16px;
-            width: 100%;
-            height: 40px;
-            padding-top: 6px;
-            padding-right: 12px;
-            padding-bottom: 6px;
-            padding-left: 12px;
-            box-shadow: 0px 0px 3px rgba(23, 31, 39, 0.3);
-            border-width: 1px;
-            border-color: transparent;
-            border-style: solid;
-            border-radius: 4px;
-        }
-    </style>
-</head>
+	<body>
+		<form id="form">
+			<div>
+				<label>API Key:</label>
+				<input type="text" id="api_key" class="field-wrapper" />
+			</div>
+			<div>
+				<label>Cardholder Name:</label>
+				<input type="text" id="holder" class="field-wrapper" />
+			</div>
+			<div>
+				<label>Card number:</label>
+				<input type="text" id="number" class="field-wrapper" />
+			</div>
+			<div>
+				<label>Expiration Date:</label>
+				<input type="text" id="expiration" class="field-wrapper" />
+			</div>
+			<div>
+				<label>Card Security Code:</label>
+				<input type="text" id="cvv" class="field-wrapper" />
+			</div>
+			<button id="send" type="submit">Submit</button>
+			<pre id="response"></pre>
+		</form>
+		<div class="container"></div>
 
-<body>
-    <form id="form">
-        <div>
-            <label>API Key:</label>
-            <input type="text" id="api_key" class="field-wrapper">
-        </div>
-        <div>
-            <label>Cardholder Name:</label>
-            <input type="text" id="holder" class="field-wrapper">
-        </div>
-        <div>
-            <label>Card number:</label>
-            <input type="text" id="number" class="field-wrapper">
-        </div>
-        <div>
-            <label>Expiration Date:</label>
-            <input type="text" id="expiration" class="field-wrapper">
-        </div>
-        <div>
-            <label>Card Security Code:</label>
-            <input type="text" id="cvv" class="field-wrapper">
-        </div>
-        <button id="send" type="submit">Submit</button>
-        <pre id="response"></pre>
-    </form>
-    <div class="container">
-    </div>
+		<script
+			type="text/javascript"
+			src="https://js.verygoodvault.com/vgs-collect/2.13.0/vgs-collect.js"
+		></script>
+		<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+		<script type="module">
+			const apiKey = document.getElementById("api_key");
+			const cardNumber = document.getElementById("number");
+			const holderName = document.getElementById("holder");
+			const expiration = document.getElementById("expiration");
+			const cvv = document.getElementById("cvv");
+			const container = document.getElementsByClassName("container")[0];
+			const response = document.getElementById("response");
 
+			import ThreeDSecureService from "../src/threedsecure-service.js";
 
-    <script type="text/javascript" src="https://js.verygoodvault.com/vgs-collect/2.13.0/vgs-collect.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script type="module">
-        const apiKey = document.getElementById('api_key');
-        const cardNumber = document.getElementById('number');
-        const holderName = document.getElementById('holder');
-        const expiration = document.getElementById('expiration');
-        const cvv = document.getElementById('cvv');
-        const container = document.getElementsByClassName('container')[0];
-        const response = document.getElementById('response');
+			const exec = async () => {
+				const gatewayClient = axios.create({
+					baseURL: "https://gateway.paybyrd.com",
+					headers: {
+						"content-type": "application/json",
+						"x-api-key": apiKey.value,
+					},
+				});
 
-        import ThreeDSecureService from '../src/threedsecure-service.js';
+				const threeDSecureService = new ThreeDSecureService({
+					container,
+					threeDSecureUrl: "https://threedsecure.paybyrd.com",
+					maxAttempts: 20,
+					attemptDelay: 2000,
+					culture: "pt-BR",
+					onProgressFn: (event) => console.log(event),
+					onReadyFn: (visible) => console.log(visible),
+					// onContainerCreatedFn: (wrapper) => console.log(wrapper),
+				});
 
-        const exec = async () => {
-            const gatewayClient = axios.create({
-                baseURL: 'https://gateway.paybyrd.com',
-                headers: {
-                    'content-type': 'application/json',
-                    'x-api-key': apiKey.value
-                }
-            });
+				/* CREATE ORDER - Start */
+				const createOrderRequest = {
+					amount: "0.01",
+					currency: "EUR",
+					orderRef: "3ds-flow-test",
+				};
 
-            const threeDSecureService = new ThreeDSecureService({
-                container,
-                threeDSecureUrl: 'https://threedsecure.paybyrd.com',
-                maxAttempts: 20,
-                attemptDelay: 2000,
-                culture: 'pt-BR',
-                onProgressFn: (event) => console.log(event)
-            });
+				const orderResponse = await gatewayClient.post(
+					"/api/v2/orders",
+					createOrderRequest
+				);
 
-            /* CREATE ORDER - Start */
-            const createOrderRequest = {
-                amount: '0.01',
-                currency: 'EUR',
-                orderRef: '3ds-flow-test'
-            }
+				if (orderResponse.status >= 300) {
+					response.innerText = JSON.stringify(orderResponse.data);
+					return;
+				}
 
-            const orderResponse = await gatewayClient.post('/api/v2/orders', createOrderRequest);
+				const { checkoutKey } = orderResponse.data;
 
-            if (orderResponse.status >= 300) {
-                response.innerText = JSON.stringify(orderResponse.data);
-                return;
-            }
+				/* CREATE ORDER - End */
 
-            const { checkoutKey } = orderResponse.data;
+				/* EXECUTE 3DS - Start */
 
-            /* CREATE ORDER - End */
+				const threeDSRequest = {
+					cardNumber: cardNumber.value,
+					cardHolder: holderName.value,
+					cardExpiration: expiration.value,
+					merchantId: 10,
+					purchaseAmount: 1,
+					purchaseCurrency: "EUR",
+					challengeOptions: "Required",
+				};
+				const threeDSResponse = await threeDSecureService.createAndExecute(
+					threeDSRequest
+				);
 
-            /* EXECUTE 3DS - Start */
+				/* EXECUTE 3DS - End */
 
-            const threeDSRequest = {
-                cardNumber: cardNumber.value,
-                cardHolder: holderName.value,
-                cardExpiration: expiration.value,
-                merchantId: 10,
-                purchaseAmount: 1,
-                purchaseCurrency: 'EUR',
-                challengeOptions: 'Required'
-            };
-            const threeDSResponse = await threeDSecureService.createAndExecute(
-                threeDSRequest);
+				/* CREATE PAYMENT - Start */
 
-            /* EXECUTE 3DS - End */
+				const createPaymentRequest = {
+					type: "Card",
+					card: {
+						number: cardNumber.value,
+						holder: holderName.value,
+						expiration: expiration.value,
+						cvv: cvv.value,
+						threeDSVersion: threeDSResponse.version,
+						aav: threeDSResponse.authenticationValue,
+						caav_algorithm: threeDSResponse.authenticationValueAlgorithm,
+						dsTransactionId: threeDSResponse.dsTransactionId,
+						eci: threeDSResponse.eci,
+						xid: threeDSResponse.xid,
+						verificationMethod: threeDSResponse.verificationMethod,
+					},
+				};
 
-            /* CREATE PAYMENT - Start */
+				const createPaymentResponse = await gatewayClient.post(
+					`/api/v2/payment?checkoutKey=${checkoutKey}`,
+					createPaymentRequest,
+					{
+						headers: {
+							correlationId: threeDSResponse.correlationId,
+						},
+					}
+				);
 
-            const createPaymentRequest = {
-                type: 'Card',
-                card: {
-                    number: cardNumber.value,
-                    holder: holderName.value,
-                    expiration: expiration.value,
-                    cvv: cvv.value,
-                    threeDSVersion: threeDSResponse.version,
-                    aav: threeDSResponse.authenticationValue,
-                    caav_algorithm: threeDSResponse.authenticationValueAlgorithm,
-                    dsTransactionId: threeDSResponse.dsTransactionId,
-                    eci: threeDSResponse.eci,
-                    xid: threeDSResponse.xid,
-                    verificationMethod: threeDSResponse.verificationMethod
-                }
-            };
+				/* CREATE PAYMENT - End */
+				response.innerHTML = JSON.stringify(createPaymentResponse);
+			};
 
-            const createPaymentResponse = await gatewayClient.post(
-                `/api/v2/payment?checkoutKey=${checkoutKey}`,
-                createPaymentRequest,
-                {
-                    headers: {
-                        correlationId: threeDSResponse.correlationId
-                    }
-                });
-
-            /* CREATE PAYMENT - End */
-            response.innerHTML = JSON.stringify(createPaymentResponse);
-        }
-
-        const form = document.getElementById('form');
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            await exec();
-        });
-    </script>
-</body>
-
+			const form = document.getElementById("form");
+			form.addEventListener("submit", async (event) => {
+				event.preventDefault();
+				await exec();
+			});
+		</script>
+	</body>
 </html>

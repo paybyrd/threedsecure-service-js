@@ -1,58 +1,59 @@
 {
-  "name": "@paybyrd/threedsecure-service",
-  "version": "2.0.1",
-  "description": "JS service implementation to control the 3DS flow over Paybyrd API",
-  "main": "dist/threedsecure-service.min.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/paybyrd/threedsecure-service-js.git"
-  },
-  "scripts": {
-    "prepublish": "babel src/threedsecure-service.js --out-dir dist --out-file-extension .min.js",
-    "samples": "live-server --open=./samples"
-  },
-  "keywords": [
-    "3ds",
-    "threedsecure",
-    "service",
-    "paybyrd",
-    "acs",
-    "mpi"
-  ],
-  "author": "tiago.resende@paybyrd.com",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/paybyrd/threedsecure-service-js/issues"
-  },
-  "homepage": "https://github.com/paybyrd/threedsecure-service-js#readme",
-  "devDependencies": {
-    "@babel/cli": "^7.18.10",
-    "@babel/preset-env": "^7.19.1",
-    "babel-plugin-module-resolver": "^4.1.0",
-    "babel-preset-minify": "^0.5.2",
-    "live-server": "1.2.2"
-  },
-  "babel": {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
-          "modules": false
-        }
-      ],
-      [
-        "minify",
-        {
-          "keepFnName": true
-        }
-      ]
-    ],
-    "plugins": [
-      "@babel/plugin-transform-spread",
-      "babel-plugin-module-resolver"
-    ]
-  },
-  "dependencies": {
-    "@paybyrd/threedsecure-service": "^2.0.0"
-  }
+	"name": "@paybyrd/threedsecure-service",
+	"version": "2.0.2",
+	"description": "JS service implementation to control the 3DS flow over Paybyrd API",
+	"main": "dist/threedsecure-service.min.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/paybyrd/threedsecure-service-js.git"
+	},
+	"scripts": {
+		"prepublish": "babel src/threedsecure-service.js --out-dir dist --out-file-extension .min.js",
+		"samples": "live-server --open=./samples"
+	},
+	"keywords": [
+		"3ds",
+		"threedsecure",
+		"service",
+		"paybyrd",
+		"acs",
+		"mpi"
+	],
+	"author": "tiago.resende@paybyrd.com",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/paybyrd/threedsecure-service-js/issues"
+	},
+	"homepage": "https://github.com/paybyrd/threedsecure-service-js#readme",
+	"devDependencies": {
+		"@babel/cli": "^7.18.10",
+		"@babel/core": "^7.22.10",
+		"@babel/preset-env": "^7.19.1",
+		"babel-plugin-module-resolver": "^4.1.0",
+		"babel-preset-minify": "^0.5.2",
+		"live-server": "1.2.2"
+	},
+	"babel": {
+		"presets": [
+			[
+				"@babel/preset-env",
+				{
+					"modules": false
+				}
+			],
+			[
+				"minify",
+				{
+					"keepFnName": true
+				}
+			]
+		],
+		"plugins": [
+			"@babel/plugin-transform-spread",
+			"babel-plugin-module-resolver"
+		]
+	},
+	"dependencies": {
+		"@paybyrd/threedsecure-service": "^2.0.0"
+	}
 }
