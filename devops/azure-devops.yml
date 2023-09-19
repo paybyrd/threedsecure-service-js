@@ -1,0 +1,44 @@
+﻿parameters:
+  - name: pool
+    displayName: 'Pool'
+    type: string
+    default: 'Self-hosted'
+    values:
+      - 'Azure Pipelines'
+      - 'Self-hosted'
+
+trigger:
+  branches:
+    include:
+      - release/*
+      - hotfix/*
+  tags:
+    include:
+      - '*'
+
+pr:
+  branches:
+    include:
+      - master
+      - main
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: Gateway/paybyrd-deployment
+      ref: refs/heads/release/5.1.0
+
+variables:
+  - template: 'variables.yml'
+
+stages:
+  - template: versioning/prepare.yml@templates
+    parameters:
+      pool: ${{ parameters.pool }}
+  - template: library/nodejs/npm/build.yml@templates
+    parameters:
+      pool: ${{ parameters.pool }}
+  - template: library/npm/deploy.yml@templates
+    parameters:
+      pool: ${{ parameters.pool }}

@@ -1,6 +1,6 @@
 {
   "name": "@paybyrd/threedsecure-service",
-  "version": "3.0.0-alpha.1",
+  "version": "1.0.0",
   "description": "JS service implementation to control the 3DS flow over Paybyrd API",
   "repository": {
     "type": "git",
