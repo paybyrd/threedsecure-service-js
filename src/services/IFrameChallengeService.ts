@@ -39,7 +39,9 @@ export class IFrameChallengeService implements IChallengeService {
                     parent: this._options.container,
                     name: IFrameChallengeService.IFRAME_NAME,
                     isVisible: true,
-                    useDefaultStyle: !!this._options.onIFrameCreatedFn
+                    useDefaultStyle: !!this._options.onIFrameCreatedFn,
+                    onCreatedFn: this._options.onIFrameCreatedFn,
+                    onReadyFn: this._options.onIFrameReadyFn
                 });
                 
                 const form = HtmlElementFactory.createForm({

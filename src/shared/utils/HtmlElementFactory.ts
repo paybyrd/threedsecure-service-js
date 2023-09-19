@@ -7,11 +7,11 @@ export class HtmlElementFactory {
         iframe.name = createIFrame.name;
 
         if (createIFrame.onReadyFn) {
-            createIFrame.onReadyFn(createIFrame.isVisible);
+            createIFrame.onReadyFn(iframe, createIFrame.isVisible);
         }
 
-        if (createIFrame.onIFrameCreatedFn) {
-            createIFrame.onIFrameCreatedFn(iframe);
+        if (createIFrame.onCreatedFn) {
+            createIFrame.onCreatedFn(iframe);
             iframe.style.opacity = createIFrame.isVisible ? "1" : "0";
         } else {
             iframe.setAttribute(

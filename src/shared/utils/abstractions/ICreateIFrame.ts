@@ -1,8 +1,11 @@
+import {OnElementCreated} from "../../../services/abstractions/OnElementCreated";
+import {OnElementReady} from "../../../services/abstractions/OnElementReady";
+
 export interface ICreateIFrame {
     parent: HTMLElement;
     name: string;
     isVisible: boolean;
     useDefaultStyle: boolean;
-    onReadyFn?: (isVisible: boolean) => void;
-    onIFrameCreatedFn?: (iframe: HTMLIFrameElement) => void;
+    onReadyFn?: OnElementReady;
+    onCreatedFn?: OnElementCreated;
 }
