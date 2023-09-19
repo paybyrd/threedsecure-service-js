@@ -1,9 +1,9 @@
 import { ConsoleLogger } from "./ConsoleLogger";
 import * as Abstractions from "./abstractions";
-import { ElasticLogger } from "./ElasticLogger";
+import { RestLogger } from "./RestLogger";
 
 export {
     ConsoleLogger,
-    ElasticLogger,
+    RestLogger,
     Abstractions
 };

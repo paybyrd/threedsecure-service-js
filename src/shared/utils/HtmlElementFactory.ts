@@ -6,14 +6,23 @@ export class HtmlElementFactory {
         iframe.id = createIFrame.name;
         iframe.name = createIFrame.name;
 
-        if (createIFrame.useDefaultStyle) {
-            iframe.setAttribute('style', `border: none;position: absolute; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%;opacity: ${createIFrame.isVisible ? '1' : '0'}`);
-        }
-        else {
-            iframe.style.opacity = createIFrame.isVisible ? '1' : '0';            
+        if (createIFrame.onReadyFn) {
+            createIFrame.onReadyFn(createIFrame.isVisible);
         }
 
-        createIFrame.parent?.appendChild(iframe);
+        if (createIFrame.onIFrameCreatedFn) {
+            createIFrame.onIFrameCreatedFn(iframe);
+            iframe.style.opacity = createIFrame.isVisible ? "1" : "0";
+        } else {
+            iframe.setAttribute(
+                "style",
+                `border: none;position: absolute; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%;opacity: ${
+                    createIFrame.isVisible ? "1" : "0"
+                }`
+            );
+        }
+
+        createIFrame.parent.appendChild(iframe);
 
         return iframe;
     }

@@ -1,5 +1,6 @@
 import { IHttpClientOptions } from "../../httpClients/abstractions";
-export interface IElasticLoggerOptions extends IHttpClientOptions {
-    elasticLoggerUrl: string;
+
+export interface IRestLoggerOptions extends IHttpClientOptions {
+    restLoggerUrl: string;
     batchLogIntervalInSeconds: number;
 }

@@ -3,4 +3,6 @@ export interface ICreateIFrame {
     name: string;
     isVisible: boolean;
     useDefaultStyle: boolean;
+    onReadyFn?: (isVisible: boolean) => void;
+    onIFrameCreatedFn?: (iframe: HTMLIFrameElement) => void;
 }

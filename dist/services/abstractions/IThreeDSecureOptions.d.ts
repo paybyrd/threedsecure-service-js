@@ -5,6 +5,5 @@ import { OnElementCreated } from "./OnElementCreated";
 export interface IThreeDSecureOptions extends IHttpClientOptions, IChallengeOptions, IElasticLoggerOptions {
     threeDSecureUrl: string;
     culture: string;
-    apiKey: string;
     onContainerCreatedFn: OnElementCreated;
 }

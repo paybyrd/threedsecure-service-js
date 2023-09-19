@@ -99,7 +99,7 @@
 
         const exec = async () => {
             const gatewayClient = axios.create({
-                baseURL: 'https://localhost:44305',
+                baseURL: 'https://gatewaysandbox.paybyrd.com',
                 headers: {
                     'content-type': 'application/json',
                     'x-api-key': apiKey.value
@@ -139,11 +139,9 @@
             const threeDSecureService = new ThreeDSecureService({
                 container,
                 threeDSecureUrl: 'https://threedsecuresandbox.paybyrd.com',
-                elasticLoggerUrl: 'http://127.0.0.1:7071/api/v1',
                 maxAttempts: 20,
                 attemptDelay: 2000,
-                culture: 'pt-BR',
-                apiKey: transaction.threeDSecure.apiKey
+                culture: 'pt-BR'
             });
 
             const threeDSRequest = {

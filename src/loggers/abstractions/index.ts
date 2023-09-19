@@ -1,4 +1,4 @@
-import { IElasticLoggerOptions } from "./IElasticLoggerOptions";
+import { IRestLoggerOptions } from "./IRestLoggerOptions";
 import { ILog } from "./ILog";
 import { ILogger } from "./ILogger";
 import { LogLevel } from "./LogLevel";
@@ -6,6 +6,6 @@ import { LogLevel } from "./LogLevel";
 export {
     ILog,
     ILogger,
-    IElasticLoggerOptions,
+    IRestLoggerOptions,
     LogLevel
 };

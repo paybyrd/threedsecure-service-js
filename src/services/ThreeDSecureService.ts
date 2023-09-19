@@ -1,7 +1,7 @@
 import { FetchHttpClient } from "../httpClients";
 import { IHttpClient } from "../httpClients/abstractions";
 import { ILogger, LogLevel } from "../loggers/abstractions";
-import { ElasticLogger } from "../loggers";
+import { RestLogger } from "../loggers";
 import { Browser } from "../shared/utils";
 import { IAuthResponse, IChallengeService, IDirectoryServerService, IExecuteRequest, IPostAuthResponse, IThreeDSecureOptions, IThreeDSecureService } from "./abstractions";
 import { IPreAuthResponse } from "./abstractions/IPreAuthResponse";
@@ -17,7 +17,7 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
 
     constructor(
         options: IThreeDSecureOptions,
-        logger: ILogger = new ElasticLogger(options),
+        logger: ILogger = new RestLogger(options),
         httpClient: IHttpClient = new FetchHttpClient(options, logger),
         directoryServer: IDirectoryServerService = new IFrameDirectoryServerService(options, logger),
         challenge: IChallengeService = new IFrameChallengeService(options, logger)) {
@@ -58,10 +58,7 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
             body: {
                 browser: Browser.create()
             },
-            correlationId: request.correlationId,
-            headers: {
-                'x-api-key': this._options.apiKey
-            }
+            correlationId: request.correlationId
         });
      }
 
@@ -76,10 +73,7 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
         return this._client.send<IAuthResponse>({
             url: `${this._options.threeDSecureUrl}/api/v1/${request.id}/auth`,
             method: 'POST',
-            correlationId: request.correlationId,
-            headers: {
-                'x-api-key': this._options.apiKey
-            }
+            correlationId: request.correlationId
         });
      }
 
@@ -94,10 +88,7 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
         return this._client.send<IPostAuthResponse>({
             url: `${this._options.threeDSecureUrl}/api/v2/${request.id}/postAuth`,
             method: 'POST',
-            correlationId: request.correlationId,
-            headers: {
-                'x-api-key': this._options.apiKey
-            }
+            correlationId: request.correlationId
         });
      }
  }

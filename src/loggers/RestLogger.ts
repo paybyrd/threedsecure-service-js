@@ -1,7 +1,7 @@
 import { FetchHttpClient } from "../httpClients";
 import { IHttpClient } from "../httpClients/abstractions";
 import { LinearRetryPolicy } from "../httpClients/retryPolicies";
-import { IElasticLoggerOptions, ILog, ILogger, LogLevel } from "./abstractions";
+import { IRestLoggerOptions, ILog, ILogger, LogLevel } from "./abstractions";
 import { ConsoleLogger } from "./ConsoleLogger";
 
 interface IFullLog {
@@ -20,15 +20,15 @@ interface IFullLog {
     exeption?: object;
 }
 
-export class ElasticLogger implements ILogger {
+export class RestLogger implements ILogger {
     private static readonly DEFAULT_BATCH_TIMEOUT = 5;
     private readonly _httpClient: IHttpClient;
     private readonly _logger: ILogger;
-    private readonly _options: IElasticLoggerOptions;
+    private readonly _options: IRestLoggerOptions;
     private _logs: Array<IFullLog> = [];
-    private _interval: NodeJS.Timer;
+    private _interval: any;
 
-    constructor(options: IElasticLoggerOptions,
+    constructor(options: IRestLoggerOptions,
         logger: ILogger = new ConsoleLogger(),
         httpClient: IHttpClient = new FetchHttpClient(options, logger, new LinearRetryPolicy({
             maxAttempts: 3,
@@ -37,13 +37,13 @@ export class ElasticLogger implements ILogger {
         this._logger = logger;
         this._options = options;
         this._httpClient = httpClient;
-        this._interval = setInterval(this.sendBatch.bind(this), (this._options.batchLogIntervalInSeconds || ElasticLogger.DEFAULT_BATCH_TIMEOUT) * 1000);
+        this._interval = setInterval(this.sendBatch.bind(this), (this._options.batchLogIntervalInSeconds || RestLogger.DEFAULT_BATCH_TIMEOUT) * 1000);
     }
 
     log(log: ILog): void {
         this._logger.log(log);
 
-        if (!this._options.elasticLoggerUrl)
+        if (!this._options.restLoggerUrl)
         {
             return;
         }
@@ -69,7 +69,7 @@ export class ElasticLogger implements ILogger {
         while (this._logs.length) {
             await this.sendBatch();
         }
-        this._interval = setInterval(this.sendBatch.bind(this), (this._options.batchLogIntervalInSeconds || ElasticLogger.DEFAULT_BATCH_TIMEOUT) * 1000);
+        this._interval = setInterval(this.sendBatch.bind(this), (this._options.batchLogIntervalInSeconds || RestLogger.DEFAULT_BATCH_TIMEOUT) * 1000);
     }
 
     async sendBatch() : Promise<void> {
@@ -80,13 +80,10 @@ export class ElasticLogger implements ILogger {
         const correlationId = logs.map(x => x.correlationId)[0];
         try {
             await this._httpClient.send<void>({
-                url: this._options.elasticLoggerUrl,
+                url: this._options.restLoggerUrl,
                 method: 'POST',
                 body: logs,
-                correlationId,
-                headers: {
-                    'x-api-key': this._options.apiKey
-                }
+                correlationId
             });
         } catch (error) {
             this._logger.log({
