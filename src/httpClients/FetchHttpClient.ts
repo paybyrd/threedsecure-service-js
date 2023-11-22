@@ -44,7 +44,7 @@ export class FetchHttpClient implements IHttpClient {
                         headers: {
                             ...request.headers,
                             'x-attempt': attempt.toString(),
-                            'x-max-attempts': maxAttempts.toString(),
+                            'x-max-attempt': maxAttempts.toString(),
                             'accept': 'application/json',
                             'content-type': 'application/json',
                             'correlationId': request.correlationId
