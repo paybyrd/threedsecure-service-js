@@ -28,9 +28,16 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
         this._challenge = challenge;
     }
 
-     async execute(request: IExecuteRequest): Promise<IPostAuthResponse> {
+     async execute(request: IExecuteRequest, correlationId = crypto.randomUUID()): Promise<IPostAuthResponse> {
         if (!request.correlationId) {
-            request.correlationId = crypto.randomUUID();
+            request.correlationId = correlationId;
+            this._logger.log({
+                message: 'Obsolete request. CorrelationId is not set.',
+                content: request,
+                method: "execute",
+                correlationId: request.correlationId,
+                level: LogLevel.Information
+            });
         }
 
         let preAuthResponse = await this.preAuth(request);
