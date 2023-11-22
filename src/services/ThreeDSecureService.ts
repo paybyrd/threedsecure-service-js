@@ -29,6 +29,10 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
     }
 
      async execute(request: IExecuteRequest): Promise<IPostAuthResponse> {
+        if (!request.correlationId) {
+            request.correlationId = crypto.randomUUID();
+        }
+
         let preAuthResponse = await this.preAuth(request);
         await this._directoryServer.execute({
             preAuthResponse,
