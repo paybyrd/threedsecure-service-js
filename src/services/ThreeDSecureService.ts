@@ -40,19 +40,23 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
             });
         }
 
-        let preAuthResponse = await this.preAuth(request);
-        await this._directoryServer.execute({
-            preAuthResponse,
-            correlationId: request.correlationId
-        });
-        let authResponse = await this.auth(request);
-        await this._challenge.execute({
-            authResponse,
-            correlationId: request.correlationId
-        });
-        let postAuthResponse = await this.postAuth(request);
-        await this._logger.flush();
-        return postAuthResponse;
+        try {
+            let preAuthResponse = await this.preAuth(request);
+            await this._directoryServer.execute({
+                preAuthResponse,
+                correlationId: request.correlationId
+            });
+            let authResponse = await this.auth(request);
+            await this._challenge.execute({
+                authResponse,
+                correlationId: request.correlationId
+            });
+            let postAuthResponse = await this.postAuth(request);
+            await this._logger.flush();
+            return postAuthResponse;
+        } finally {
+            this.reset();
+        }
      }
 
      private async preAuth(request: IExecuteRequest): Promise<IPreAuthResponse> {
@@ -104,6 +108,11 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
             correlationId: request.correlationId
         });
         return await result.getData();
+     }
+
+     private reset() : void {
+        this._challenge.reset();
+        this._directoryServer.reset();
      }
  }
 

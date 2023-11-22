@@ -155,4 +155,10 @@ export class IFrameDirectoryServerService implements IDirectoryServerService {
             }
         });
     }
+
+    reset(): void {
+        document.getElementById(IFrameDirectoryServerService.IFRAME_NAME)?.remove();
+        document.getElementById(IFrameDirectoryServerService.FORM_NAME)?.remove();
+        document.getElementById(IFrameDirectoryServerService.FORM_INPUT_NAME)?.remove();
+    }
 }
