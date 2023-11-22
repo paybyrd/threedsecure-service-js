@@ -1,2 +1,4 @@
 ﻿variables:
+  - name: artifact_name
+    value: 'threedsecure-service-js'
   - group: npm

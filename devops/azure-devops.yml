@@ -36,9 +36,13 @@ stages:
   - template: versioning/prepare.yml@templates
     parameters:
       pool: ${{ parameters.pool }}
-  - template: library/npm/build.yml@templates
+
+  - template: library/nodejs/build.yml@templates
     parameters:
       pool: ${{ parameters.pool }}
-  # - template: library/npm/deploy.yml@templates
-  #   parameters:
-  #     pool: ${{ parameters.pool }}
+      artifact_name: ${{ variables.artifact_name }}
+      
+  - template: npm/deploy.yml@templates
+    parameters:
+      pool: ${{ parameters.pool }}
+      artifact_name: ${{ variables.artifact_name }}
