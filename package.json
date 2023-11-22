@@ -12,8 +12,7 @@
   "module": "./dist/index.module.js",
   "unpkg": "./dist/index.umd.js",
   "exports": {
-    "require": "./dist/index.js",
-    "default": "./dist/index.modern.mjs"
+    ".": "./dist/index.modern.mjs"
   },
   "types": "./dist/index.d.ts",
   "scripts": {
