@@ -1,5 +1,6 @@
 import { ILogger, LogLevel } from "../loggers/abstractions";
 import { Base64Converter, HtmlElementFactory } from "../shared/utils";
+import { Stopwatch } from "../shared/utils/Stopwatch";
 import { ChallengeWindowSize, IChallengeExecute, IChallengeOptions, IChallengeService } from "./abstractions";
 
 export class IFrameChallengeService implements IChallengeService {
@@ -24,7 +25,7 @@ export class IFrameChallengeService implements IChallengeService {
         return new Promise<void>((resolve, reject) => {
             try {
                 this._logger.log({
-                    message: '[Request] Challenge execution',
+                    message: 'Challenge - Start',
                     content: {
                         authResponse: request.authResponse
                     },
@@ -35,13 +36,20 @@ export class IFrameChallengeService implements IChallengeService {
 
                 this._options.container.innerHTML = '';
 
-                HtmlElementFactory.createIFrame({
+                const iFrame = HtmlElementFactory.createIFrame({
                     parent: this._options.container,
                     name: IFrameChallengeService.IFRAME_NAME,
                     isVisible: true,
                     useDefaultStyle: !!this._options.onIFrameCreatedFn,
                     onCreatedFn: this._options.onIFrameCreatedFn,
                     onReadyFn: this._options.onIFrameReadyFn
+                });
+
+                this._logger.log({
+                    message: 'Challenge - Create iFrame',
+                    method: "executeChallenge",
+                    correlationId: request.correlationId,
+                    level: LogLevel.Information
                 });
                 
                 const form = HtmlElementFactory.createForm({
@@ -52,10 +60,24 @@ export class IFrameChallengeService implements IChallengeService {
                     method: 'post'
                 });
 
+                this._logger.log({
+                    message: 'Challenge - Create form',
+                    method: "executeChallenge",
+                    correlationId: request.correlationId,
+                    level: LogLevel.Information
+                });
+
                 const threeDSRequestInput = HtmlElementFactory.createInput({
                     parent: form,
                     name: IFrameChallengeService.CREQ_INPUT_NAME,
                     type: IFrameChallengeService.CREQ_INPUT_TYPE
+                });
+
+                this._logger.log({
+                    message: 'Challenge - Create input',
+                    method: "executeChallenge",
+                    correlationId: request.correlationId,
+                    level: LogLevel.Information
                 });
 
                 const cReq = {
@@ -69,10 +91,45 @@ export class IFrameChallengeService implements IChallengeService {
                 const base64CReq = Base64Converter.convert(cReq)
                 threeDSRequestInput.value = base64CReq;
 
+                this._logger.log({
+                    message: 'Challenge - Prepare cReq',
+                    content: {
+                        cReq,
+                        base64CReq
+                    },
+                    method: "executeChallenge",
+                    correlationId: request.correlationId,
+                    level: LogLevel.Information
+                });
+
+                const stopwatch = new Stopwatch();
+                const checkIFrameLoaded = () => {
+                    const iframeDoc = iFrame.contentDocument || iFrame.contentWindow?.document;
+
+                    if (iframeDoc?.readyState  == 'complete' ) {
+                        this._logger.log({
+                                message: `Challenge - iFrame loaded in ${stopwatch.elapsed}ms`,
+                                content: {
+                                    iFrame: iframeDoc.body.innerText
+                                },
+                                method: "executeChallenge",
+                                correlationId: request.correlationId,
+                                level: LogLevel.Information
+                            });
+                        
+                        return;
+                    } 
+                
+                    // If we are here, it is not loaded. Set things up so we check the status again in 250 milliseconds
+                    setTimeout(checkIFrameLoaded, 100);
+                }
+
                 form.submit();
+                
+                setTimeout(checkIFrameLoaded, 100);
 
                 this._logger.log({
-                    message: '[Response] Challenge execution',
+                    message: 'Challenge - Submit form',
                     content: {
                         authResponse: request.authResponse,
                         cReq,
@@ -87,11 +144,11 @@ export class IFrameChallengeService implements IChallengeService {
             }
             catch (error) {
                 this._logger.log({
-                    message: '[Error] Challenge execution',
+                    message: 'Challenge - error',
                     content: {
-                        authResponse: request.authResponse,
-                        error
+                        authResponse: request.authResponse
                     },
+                    error: error,
                     method: "executeChallenge",
                     correlationId: request.correlationId,
                     level: LogLevel.Error

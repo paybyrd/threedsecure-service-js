@@ -1,5 +1,6 @@
 import { ILogger, LogLevel } from "../loggers/abstractions";
 import { Base64Converter, HtmlElementFactory } from "../shared/utils";
+import { Stopwatch } from "../shared/utils/Stopwatch";
 import { IDirectoryServerExecute, IDirectoryServerOptions, IDirectoryServerService } from "./abstractions";
 
 export class IFrameDirectoryServerService implements IDirectoryServerService {
@@ -24,22 +25,31 @@ export class IFrameDirectoryServerService implements IDirectoryServerService {
         return new Promise<void>((resolve, reject) => {
             try {
                 this._logger.log({
-                    message: '[Request] DirectoryServer execution',
-                    content: request,
-                    method: "directoryServerExecute",
+                    message: 'DirectoryServer - Start',
+                    content: {
+                        preAuthResponse: request
+                    },
+                    method: 'executeDirectoryServer',
                     correlationId: request.correlationId,
                     level: LogLevel.Information
                 });
 
                 this._options.container.innerHTML = '';
 
-                const iframe = HtmlElementFactory.createIFrame({
+                const iFrame = HtmlElementFactory.createIFrame({
                     parent: this._options.container,
                     isVisible: false,
                     name: IFrameDirectoryServerService.IFRAME_NAME,
                     useDefaultStyle: !!this._options.onIFrameCreatedFn
                 });
-                this._options.onIFrameCreatedFn?.call(this._options, iframe);
+                this._options.onIFrameCreatedFn?.call(this._options, iFrame);
+
+                this._logger.log({
+                    message: 'DirectoryServer - Create iFrame',
+                    method: "executeDirectoryServer",
+                    correlationId: request.correlationId,
+                    level: LogLevel.Information
+                });
                 
                 const form = HtmlElementFactory.createForm({
                     parent: this._options.container,
@@ -49,10 +59,24 @@ export class IFrameDirectoryServerService implements IDirectoryServerService {
                     method: 'POST'
                 });
 
+                this._logger.log({
+                    message: 'DirectoryServer - Create Form',
+                    method: "executeDirectoryServer",
+                    correlationId: request.correlationId,
+                    level: LogLevel.Information
+                });
+
                 const threeDSMethodDataInput = HtmlElementFactory.createInput({
                     parent: form,
                     name: IFrameDirectoryServerService.FORM_INPUT_NAME,
                     type: IFrameDirectoryServerService.FROM_INPUT_TYPE
+                });
+
+                this._logger.log({
+                    message: 'DirectoryServer - Create Input',
+                    method: "executeDirectoryServer",
+                    correlationId: request.correlationId,
+                    level: LogLevel.Information
                 });
 
                 const threeDSMethodData = {
@@ -63,15 +87,50 @@ export class IFrameDirectoryServerService implements IDirectoryServerService {
                 const threeDSMethodDataBase64 = Base64Converter.convert(threeDSMethodData)
                 threeDSMethodDataInput.value = threeDSMethodDataBase64;
 
-                form.submit();
-
                 this._logger.log({
-                    message: '[Response] DirectoryServer execution',
+                    message: 'DirectoryServer - Prepare threeDSMethodData',
                     content: {
-                        request,
+                        threeDSMethodData,
                         threeDSMethodDataBase64
                     },
-                    method: "directoryServerExecute",
+                    method: "executeDirectoryServer",
+                    correlationId: request.correlationId,
+                    level: LogLevel.Information
+                });
+
+                const stopwatch = new Stopwatch();
+                const checkIFrameLoaded = () => {
+                    const iframeDoc = iFrame.contentDocument || iFrame.contentWindow?.document;
+
+                    if (iframeDoc?.readyState  == 'complete' ) {
+                        this._logger.log({
+                                message: `DirectoryServer - iFrame loaded in ${stopwatch.elapsed}ms`,
+                                content: {
+                                    iFrame: iframeDoc.body.innerText
+                                },
+                                method: "executeDirectoryServer",
+                                correlationId: request.correlationId,
+                                level: LogLevel.Information
+                            });
+                        
+                        return;
+                    } 
+                
+                    // If we are here, it is not loaded. Set things up so we check the status again in 250 milliseconds
+                    setTimeout(checkIFrameLoaded, 100);
+                }
+
+                form.submit();
+
+                setTimeout(checkIFrameLoaded, 100);
+
+                this._logger.log({
+                    message: 'DirectoryServer - Submit form',
+                    content: {
+                        threeDSMethodData,
+                        threeDSMethodDataBase64
+                    },
+                    method: "executeDirectoryServer",
                     correlationId: request.correlationId,
                     level: LogLevel.Information
                 });
@@ -80,11 +139,11 @@ export class IFrameDirectoryServerService implements IDirectoryServerService {
             }
             catch (error) {
                 this._logger.log({
-                    message: '[Error] DirectoryServer execution',
+                    message: 'DirectoryServer - Error',
                     content: {
-                        request,
-                        error
+                        preAuthResponse: request
                     },
+                    error,
                     method: "directoryServerExecute",
                     correlationId: request.correlationId,
                     level: LogLevel.Error

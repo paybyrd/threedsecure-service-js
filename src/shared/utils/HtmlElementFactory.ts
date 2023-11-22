@@ -14,12 +14,14 @@ export class HtmlElementFactory {
             createIFrame.onCreatedFn(iframe);
             iframe.style.opacity = createIFrame.isVisible ? "1" : "0";
         } else {
+            /* ToDo: Fix this
             iframe.setAttribute(
                 "style",
                 `border: none;position: absolute; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%;opacity: ${
                     createIFrame.isVisible ? "1" : "0"
                 }`
             );
+            */
         }
 
         createIFrame.parent.appendChild(iframe);

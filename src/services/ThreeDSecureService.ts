@@ -29,22 +29,22 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
     }
 
      async execute(request: IExecuteRequest): Promise<IPostAuthResponse> {
-        let preAuthResponse = await this._preAuth(request);
+        let preAuthResponse = await this.preAuth(request);
         await this._directoryServer.execute({
             preAuthResponse,
             correlationId: request.correlationId
         });
-        let authResponse = await this._auth(request);
+        let authResponse = await this.auth(request);
         await this._challenge.execute({
             authResponse,
             correlationId: request.correlationId
         });
-        let postAuthResponse = await this._postAuth(request);
+        let postAuthResponse = await this.postAuth(request);
         await this._logger.flush();
         return postAuthResponse;
      }
 
-     _preAuth(request: IExecuteRequest): Promise<IPreAuthResponse> {
+     private async preAuth(request: IExecuteRequest): Promise<IPreAuthResponse> {
         this._logger.log({
             message: 'Executing PreAuth',
             content: request,
@@ -52,7 +52,7 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
             correlationId: request.correlationId,
             level: LogLevel.Information
         });
-        return this._client.send<IPreAuthResponse>({
+        const result = await this._client.send<IPreAuthResponse>({
             url: `${this._options.threeDSecureUrl}/api/v2/${request.id}/preAuth`,
             method: 'POST',
             body: {
@@ -60,9 +60,10 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
             },
             correlationId: request.correlationId
         });
+        return await result.getData();
      }
 
-     _auth(request: IExecuteRequest): Promise<IAuthResponse> {
+     private async auth(request: IExecuteRequest): Promise<IAuthResponse> {
         this._logger.log({
             message: 'Executing Auth',
             content: request,
@@ -70,14 +71,15 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
             correlationId: request.correlationId,
             level: LogLevel.Information
         });
-        return this._client.send<IAuthResponse>({
+        const result = await this._client.send<IAuthResponse>({
             url: `${this._options.threeDSecureUrl}/api/v1/${request.id}/auth`,
             method: 'POST',
             correlationId: request.correlationId
         });
+        return await result.getData();
      }
 
-     _postAuth(request: IExecuteRequest): Promise<IPostAuthResponse> {
+     private async postAuth(request: IExecuteRequest): Promise<IPostAuthResponse> {
         this._logger.log({
             message: 'Executing PostAuth',
             content: request,
@@ -85,11 +87,12 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
             correlationId: request.correlationId,
             level: LogLevel.Information
         });
-        return this._client.send<IPostAuthResponse>({
+        const result =  await this._client.send<IPostAuthResponse>({
             url: `${this._options.threeDSecureUrl}/api/v2/${request.id}/postAuth`,
             method: 'POST',
             correlationId: request.correlationId
         });
+        return await result.getData();
      }
  }
 

@@ -9,6 +9,7 @@ interface IFullLog {
         name: string;
         version: string
     },
+    environment: 'Development' | 'Staging' | 'Production';
     executionDate: Date,
     entrypoint: string;
     method: string;
@@ -48,18 +49,22 @@ export class RestLogger implements ILogger {
             return;
         }
 
-        this._logs.push({
+        this._logs.unshift({
             customMessage: log.message,
-            message: `[FRONTEND] ${log.message}`,
+            message: `[Paybyrd.ThreeDSecure.JS] ${log.message}`,
             service: {
-                name: 'ThreeDSecure.Service.JS',
+                name: 'Paybyrd.ThreeDSecure.JS',
                 version: '3.0.0'
             },
+            environment: this._options.environment || 'Development',
             executionDate: new Date(),
             entrypoint: 'Execute',
             method: log.method,
             correlationId: log.correlationId,
-            content: log.content,
+            content: {
+                ...log.content,
+                error: log.error?.toString()
+            },
             level: log.level
         });
     }

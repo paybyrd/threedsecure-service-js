@@ -6,7 +6,11 @@ export class ConsoleLogger implements ILogger {
     }
     
     log(log: ILog): void {
-        console.log(JSON.stringify(log));
+        const errorLog = {
+            ...log,
+            error: log.error?.toString()
+        };
+        console.log(errorLog);
     }
 
 }

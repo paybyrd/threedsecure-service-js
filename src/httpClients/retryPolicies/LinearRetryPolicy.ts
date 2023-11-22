@@ -2,6 +2,7 @@ import { ILogger, LogLevel } from "../../loggers/abstractions";
 import { IError } from "../../shared/abstractions";
 import { Delay } from "../../shared/utils";
 import { IRetryExecution, IRetryOptions, IRetryPolicy } from "../abstractions";
+import { IResult } from "../abstractions/IResult";
 
 export class LinearRetryPolicy implements IRetryPolicy {
     private readonly _options: IRetryOptions;
@@ -16,10 +17,10 @@ export class LinearRetryPolicy implements IRetryPolicy {
         executeFn,
         method,
         correlationId
-    }: IRetryExecution<T>) : Promise<T> {
-        return new Promise<T>(async (resolve, reject) => {
+    }: IRetryExecution<T>) : Promise<IResult<T>> {
+        return new Promise<IResult<T>>(async (resolve, reject) => {
             let attempt = 1;
-            let lastError: IError|null = null;
+            let lastError: IError | null = null;
             do {
                 try {
                     let result = await executeFn({
@@ -27,7 +28,7 @@ export class LinearRetryPolicy implements IRetryPolicy {
                         maxAttempts: this._options.maxAttempts
                     });
                     if (result.isSuccess) {
-                        resolve(result.data);
+                        resolve(result);
                         return;
                     }
                     if (!result.isTransientError) {

@@ -1,5 +1,7 @@
 import { ILogger, LogLevel } from "../loggers/abstractions";
+import { Stopwatch } from "../shared/utils/Stopwatch";
 import { IHttpClient, IHttpClientOptions, IRequest, IRetryPolicy } from "./abstractions";
+import { IResult } from "./abstractions/IResult";
 import { LinearRetryPolicy } from "./retryPolicies";
 
 export class FetchHttpClient implements IHttpClient {
@@ -13,16 +15,17 @@ export class FetchHttpClient implements IHttpClient {
         this._options = options;
     }
 
-    async send<T>(request: IRequest): Promise<T> {
+    async send<T>(request: IRequest): Promise<IResult<T>> {
         const self = this;
         return await this._retryPolicy.execute<T>({
             executeFn: async ({ attempt, maxAttempts }) => {
                 const timeout = (self._options.timeoutInSeconds || 30) * 1000;
                 const abortController = new AbortController();
                 const timeoutId = setTimeout(() => abortController.abort(), timeout);
-
+                const url = new URL(request.url);
+                
                 this._logger.log({
-                    message: '[Request] HttpClient',
+                    message: `ExternalService - Request (${url.host})`,
                     content: {
                         request,
                         attempt,
@@ -33,39 +36,64 @@ export class FetchHttpClient implements IHttpClient {
                     level: LogLevel.Information
                 });
 
-                const response = await fetch(request.url, {
-                    headers: {
-                        ...request.headers,
-                        'x-attempt': attempt.toString(),
-                        'x-max-attempts': maxAttempts.toString(),
-                        'accept': 'application/json',
-                        'content-type': 'application/json',
-                    },
-                    keepalive: true,
-                    body: JSON.stringify(request.body),
-                    method: request.method,
-                    signal: abortController.signal
-                });
+                const stopwatch = new Stopwatch();
+                let response : Response;
+                try
+                {
+                    response = await fetch(request.url, {
+                        headers: {
+                            ...request.headers,
+                            'x-attempt': attempt.toString(),
+                            'x-max-attempts': maxAttempts.toString(),
+                            'accept': 'application/json',
+                            'content-type': 'application/json',
+                            'correlationId': request.correlationId
+                        },
+                        keepalive: true,
+                        body: JSON.stringify(request.body),
+                        method: request.method,
+                        signal: abortController.signal
+                    });
 
-                this._logger.log({
-                    message: '[Response] HttpClient',
-                    content: {
-                        response,
-                        attempt,
-                        maxAttempts
-                    },
-                    method: "send",
-                    correlationId: request.correlationId,
-                    level: LogLevel.Information
-                });
+                    this._logger.log({
+                        message: `ExternalService - Response (${url.host}) in ${stopwatch.elapsed}ms`,
+                        content: {
+                            request,
+                            attempt,
+                            maxAttempts,
+                            response
+                        },
+                        method: "send",
+                        correlationId: request.correlationId,
+                        level: LogLevel.Error
+                    });
+                }
+                catch (error) {
+                    this._logger.log({
+                        message: `ExternalService - Error (${url.host}) in ${stopwatch.elapsed}ms`,
+                        content: {
+                            request,
+                            attempt,
+                            maxAttempts,
+                            error
+                        },
+                        method: "send",
+                        correlationId: request.correlationId,
+                        level: LogLevel.Error
+                    });
+                    throw error;
+                }
 
                 clearTimeout(timeoutId);
-                const result = await response.json();
-                return {
+                const result : IResult<T> = {
                     isSuccess: response.ok,
                     isTransientError: this.isTransientError(response),
-                    data: response.ok ? result.data : result
+                    getData: async () => {
+                        const result = await response.json();
+                        return result.data as T;
+                    }
                 };
+                return result;
             },
             method: `[${request.method}] ${request.url}`,
             correlationId: request.correlationId
