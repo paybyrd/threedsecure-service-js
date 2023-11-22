@@ -11,9 +11,6 @@
   "umd:main": "./dist/index.umd.js",
   "module": "./dist/index.module.js",
   "unpkg": "./dist/index.umd.js",
-  "exports": {
-    ".": "./dist/index.modern.mjs"
-  },
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "microbundle",
