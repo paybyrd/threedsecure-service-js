@@ -1,4 +1,4 @@
-﻿parameters:
+parameters:
   - name: pool
     displayName: 'Pool'
     type: string
@@ -36,9 +36,9 @@ stages:
   - template: versioning/prepare.yml@templates
     parameters:
       pool: ${{ parameters.pool }}
-  - template: library/nodejs/npm/build.yml@templates
+  - template: library/npm/build.yml@templates
     parameters:
       pool: ${{ parameters.pool }}
-  - template: library/npm/deploy.yml@templates
-    parameters:
-      pool: ${{ parameters.pool }}
+  # - template: library/npm/deploy.yml@templates
+  #   parameters:
+  #     pool: ${{ parameters.pool }}
