@@ -162,8 +162,12 @@ export class IFrameChallengeService implements IChallengeService {
     }
 
     reset(): void {
-        document.getElementById(IFrameChallengeService.IFRAME_NAME)?.remove();
-        document.getElementById(IFrameChallengeService.FORM_NAME)?.remove();
-        document.getElementById(IFrameChallengeService.CREQ_INPUT_NAME)?.remove();
+        try {
+            document.getElementById(IFrameChallengeService.IFRAME_NAME)?.remove();
+            document.getElementById(IFrameChallengeService.FORM_NAME)?.remove();
+            document.getElementById(IFrameChallengeService.CREQ_INPUT_NAME)?.remove();
+        } catch {
+            // Do nothing
+        }
     }
 }
