@@ -5,13 +5,15 @@ import { IAuthResponse, IChallengeService, IDirectoryServerService, IExecuteRequ
 import { IPreAuthResponse } from "./abstractions/IPreAuthResponse";
 import { IFrameChallengeService } from "./IFrameChallengeService";
 import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
+import { IObservable, IObserver, IEvent } from "../observer/abstractions";
 
- export class ThreeDSecureService implements IThreeDSecureService {
+ export class ThreeDSecureService implements IThreeDSecureService, IObservable {
     private readonly _options: IThreeDSecureOptions;
     private readonly _logger: ILogger;
     private readonly _client: IHttpClient;
     private readonly _directoryServer: IDirectoryServerService;
     private readonly _challenge: IChallengeService;
+    private readonly _observers: IObserver[] = [];
 
     constructor(
         options: IThreeDSecureOptions,
@@ -25,6 +27,17 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
         this._directoryServer = directoryServer;
         this._challenge = challenge;
     }
+
+     subscribe(observer: IObserver): void {
+         this._observers.push(observer);
+     }
+     
+     unsubscribe(observer: IObserver): void {
+        const index = this._observers.indexOf(observer);
+        if (index > -1) {
+            this._observers.splice(index, 1);
+        }
+     }
 
      async execute(request: IExecuteRequest, correlationId = crypto.randomUUID()): Promise<IPostAuthResponse> {
         if (!request.correlationId) {
@@ -65,6 +78,10 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
             correlationId: request.correlationId,
             level: LogLevel.Information
         });
+        this.notifyAll({
+            name: 'preAuth:started',
+            data: request
+        });
         const result = await this._client.send<IPreAuthResponse>({
             url: `${this._options.threeDSecureUrl}/api/v2/${request.id}/preAuth`,
             method: 'POST',
@@ -72,6 +89,10 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
                 browser: Browser.create()
             },
             correlationId: request.correlationId
+        });
+        this.notifyAll({
+            name: 'preAuth:completed',
+            data: result
         });
         return await result.getData();
      }
@@ -84,10 +105,18 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
             correlationId: request.correlationId,
             level: LogLevel.Information
         });
+        this.notifyAll({
+            name: 'auth:started',
+            data: request
+        });
         const result = await this._client.send<IAuthResponse>({
             url: `${this._options.threeDSecureUrl}/api/v1/${request.id}/auth`,
             method: 'POST',
             correlationId: request.correlationId
+        });
+        this.notifyAll({
+            name: 'auth:completed',
+            data: result
         });
         return await result.getData();
      }
@@ -100,17 +129,35 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
             correlationId: request.correlationId,
             level: LogLevel.Information
         });
+        this.notifyAll({
+            name: 'postAuth:completed',
+            data: request
+        });
         const result =  await this._client.send<IPostAuthResponse>({
             url: `${this._options.threeDSecureUrl}/api/v2/${request.id}/postAuth`,
             method: 'POST',
             correlationId: request.correlationId
         });
+        this.notifyAll({
+            name: 'postAuth:completed',
+            data: result
+        });
         return await result.getData();
      }
 
      private reset() : void {
+        this.notifyAll({
+            name: 'reset:started'
+        });
         this._challenge.reset();
         this._directoryServer.reset();
+        this.notifyAll({
+            name: 'reset:completed'
+        });
+     }
+
+     private notifyAll(event: IEvent): void {
+        this._observers.forEach(observer => observer.notify(event));
      }
 
      private static getLoggerOptions(options: IThreeDSecureOptions): IRestLoggerOptions {

@@ -56,7 +56,7 @@ export class FetchHttpClient implements IHttpClient {
                     });
 
                     this._logger.log({
-                        message: `ExternalService - Response (${url.host}) in ${stopwatch.elapsed}ms`,
+                        message: `ExternalService - Response (${url.host})`,
                         content: {
                             request,
                             attempt,
@@ -68,12 +68,13 @@ export class FetchHttpClient implements IHttpClient {
                         },
                         method: "send",
                         correlationId: request.correlationId,
-                        level: LogLevel.Error
+                        level: LogLevel.Error,
+                        elapsedTimeInMilliseconds: stopwatch.elapsed
                     });
                 }
                 catch (error) {
                     this._logger.log({
-                        message: `ExternalService - Error (${url.host}) in ${stopwatch.elapsed}ms`,
+                        message: `ExternalService - Error (${url.host})`,
                         content: {
                             request,
                             attempt,
@@ -82,7 +83,8 @@ export class FetchHttpClient implements IHttpClient {
                         },
                         method: "send",
                         correlationId: request.correlationId,
-                        level: LogLevel.Error
+                        level: LogLevel.Error,
+                        elapsedTimeInMilliseconds: stopwatch.elapsed
                     });
                     throw error;
                 }
