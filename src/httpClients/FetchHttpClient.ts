@@ -61,7 +61,10 @@ export class FetchHttpClient implements IHttpClient {
                             request,
                             attempt,
                             maxAttempts,
-                            response
+                            response: {
+                                statusCode: response.status,
+                                data: await response.clone().text()
+                            }
                         },
                         method: "send",
                         correlationId: request.correlationId,
