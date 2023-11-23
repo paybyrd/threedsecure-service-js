@@ -1,7 +1,6 @@
 import { FetchHttpClient } from "../httpClients";
 import { IHttpClient } from "../httpClients/abstractions";
-import { ILogger, LogLevel } from "../loggers/abstractions";
-import { RestLogger } from "../loggers";
+import { ILogger, IRestLoggerOptions, LogLevel, RestLogger } from "@paybyrd/logger-js";
 import { Browser } from "../shared/utils";
 import { IAuthResponse, IChallengeService, IDirectoryServerService, IExecuteRequest, IPostAuthResponse, IThreeDSecureOptions, IThreeDSecureService } from "./abstractions";
 import { IPreAuthResponse } from "./abstractions/IPreAuthResponse";
@@ -17,7 +16,7 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
 
     constructor(
         options: IThreeDSecureOptions,
-        logger: ILogger = new RestLogger(options),
+        logger: ILogger = new RestLogger(ThreeDSecureService.getLoggerOptions(options)),
         httpClient: IHttpClient = new FetchHttpClient(options, logger),
         directoryServer: IDirectoryServerService = new IFrameDirectoryServerService(options, logger),
         challenge: IChallengeService = new IFrameChallengeService(options, logger)) {
@@ -114,6 +113,18 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
         this._challenge.reset();
         this._directoryServer.reset();
      }
- }
 
+     private static getLoggerOptions(options: IThreeDSecureOptions): IRestLoggerOptions {
+        return {
+            restLoggerUrl: options.logUrl,
+            timeoutInSeconds: options.timeoutInSeconds || 30,
+            environment: options.environment || 'Development',
+            batchLogIntervalInSeconds: options.batchLogIntervalInSeconds || 5,
+            service: {
+                name: 'Paybyrd.ThreeDSecure.JS',
+                version: '3.1.0'
+            }
+        };
+     }
+ }
  

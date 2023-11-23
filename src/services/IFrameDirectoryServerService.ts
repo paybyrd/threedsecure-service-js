@@ -1,4 +1,4 @@
-import { ILogger, LogLevel } from "../loggers/abstractions";
+import { ILogger, LogLevel } from "@paybyrd/logger-js";
 import { Base64Converter, HtmlElementFactory } from "../shared/utils";
 import { Stopwatch } from "../shared/utils/Stopwatch";
 import { IDirectoryServerExecute, IDirectoryServerOptions, IDirectoryServerService } from "./abstractions";

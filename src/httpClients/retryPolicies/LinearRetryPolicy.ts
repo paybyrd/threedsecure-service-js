@@ -1,4 +1,4 @@
-import { ILogger, LogLevel } from "../../loggers/abstractions";
+import { ILogger, LogLevel } from "@paybyrd/logger-js";
 import { IError } from "../../shared/abstractions";
 import { Delay } from "../../shared/utils";
 import { IRetryExecution, IRetryOptions, IRetryPolicy } from "../abstractions";
