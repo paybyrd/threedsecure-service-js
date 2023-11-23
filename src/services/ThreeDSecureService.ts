@@ -121,16 +121,16 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
             batchLogIntervalInSeconds: options.batchLogIntervalInSeconds || 5,
             service: {
                 name: 'Paybyrd.ThreeDSecure.JS',
-                version: '3.1.0'
+                version: '3.1.1'
             }
         };
      }
 
      private static getHttpClientOptions(options: IThreeDSecureOptions): IHttpClientOptions {
         return {
-            timeoutInSeconds: options.timeoutInSeconds || 10,
-            attemptDelayInSeconds: options.attemptDelayInSeconds || 1,
-            maxAttempts: options.maxAttempts || 3
+            timeoutInSeconds: options.timeoutInSeconds || 30,
+            attemptDelayInSeconds: options.attemptDelayInSeconds || 2,
+            maxAttempts: options.maxAttempts || 50
         };
      }
  }

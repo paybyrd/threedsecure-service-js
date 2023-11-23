@@ -27,9 +27,9 @@ A library to simplify the implementation of 3DS flow using Paybyrd API.
 * **threeDSecureUrl:** Paybyrd ThreeDSecure API base URL. **DEFAULT: https://threedsecure.paybyrd.com**
 * **culture**: The culture that should be used for API responses. **DEFAULT: en-US**
 * **maxAttempts:** The max attempts when the API returns transient errors, like 409, 404 or 504 status codes. **DEFAULT: 50**
-* **attemptDelay:** The amount of time in milliseconds to wait for the next attempt when some transient error happens.**DEFAULT: 2000**
+* **attemptDelayInSeconds:** The amount of time in milliseconds to wait for the next attempt when some transient error happens.**DEFAULT: 2**
 * **timeoutInSeconds:** The amount of time in seconds to wait for the API response. **DEFAULT: 30**
-* **restLoggerUrl:** A Log API base URL used to send the logs.**DEFAULT: null**
+* **logUrl:** A Log API base URL used to send the logs.**DEFAULT: null**
 * **batchLogIntervalInSeconds:** The amount of time in seconds to send batch logs to the rest logger. **DEFAULT: 5**
 
 
