@@ -11,7 +11,7 @@ A library to simplify the implementation of 3DS flow using Paybyrd API.
 ### Parameters
 
 * **options:** The service configurations object.
-* **logger:** A notification object to log what is happening inside the service. **DEFAULT: null**
+* **logger:** A notification object to log what is happening inside the service. **DEFAULT: RestLogger**
 * **httpClient:** A client used to send the API requests.
 * **directoryServer:** A service to allow customizations to the Directory Server.
 * **challenge:** A service to allow customizations to the Challenge.
