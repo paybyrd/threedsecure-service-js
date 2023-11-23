@@ -50,10 +50,10 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
                 correlationId: request.correlationId
             });
             let postAuthResponse = await this.postAuth(request);
-            await this._logger.flush();
             return postAuthResponse;
         } finally {
             this.reset();
+            await this._logger.flush();
         }
      }
 
