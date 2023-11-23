@@ -17,7 +17,8 @@
     "allowSyntheticDefaultImports": true,
     "paths": {
       "@paybyrd/logger-js": ["./node_modules/@paybyrd/logger-js"],
-      "@paybyrd/threedsecure-service-js/*": ["./src/*"]
+      "@paybyrd/threedsecure-service-js/*": ["./src/*"],
+      "@paybyrd/http-client": ["./src/httpClients"]
     }
   },
   "include": ["src"],

@@ -1,5 +1,1 @@
-import { LinearRetryPolicy } from "./LinearRetryPolicy";
-
-export {
-    LinearRetryPolicy
-};
+export { LinearRetryPolicy } from "./LinearRetryPolicy";

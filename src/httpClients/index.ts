@@ -1,5 +1,3 @@
-import { FetchHttpClient } from "./FetchHttpClient";
-
-export {
-    FetchHttpClient
-};
+export { FetchHttpClient } from "./FetchHttpClient";
+export * from "./retryPolicies";
+export * from "./abstractions";

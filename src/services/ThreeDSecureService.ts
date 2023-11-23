@@ -1,5 +1,4 @@
-import { FetchHttpClient } from "../httpClients";
-import { IHttpClient } from "../httpClients/abstractions";
+import { IHttpClient, FetchHttpClient, IHttpClientOptions } from "@paybyrd/http-client";
 import { ILogger, IRestLoggerOptions, LogLevel, RestLogger } from "@paybyrd/logger-js";
 import { Browser } from "../shared/utils";
 import { IAuthResponse, IChallengeService, IDirectoryServerService, IExecuteRequest, IPostAuthResponse, IThreeDSecureOptions, IThreeDSecureService } from "./abstractions";
@@ -17,7 +16,7 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
     constructor(
         options: IThreeDSecureOptions,
         logger: ILogger = new RestLogger(ThreeDSecureService.getLoggerOptions(options)),
-        httpClient: IHttpClient = new FetchHttpClient(options, logger),
+        httpClient: IHttpClient = new FetchHttpClient(ThreeDSecureService.getHttpClientOptions(options), logger),
         directoryServer: IDirectoryServerService = new IFrameDirectoryServerService(options, logger),
         challenge: IChallengeService = new IFrameChallengeService(options, logger)) {
         this._options = options;
@@ -124,6 +123,14 @@ import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
                 name: 'Paybyrd.ThreeDSecure.JS',
                 version: '3.1.0'
             }
+        };
+     }
+
+     private static getHttpClientOptions(options: IThreeDSecureOptions): IHttpClientOptions {
+        return {
+            timeoutInSeconds: options.timeoutInSeconds || 10,
+            attemptDelayInSeconds: options.attemptDelayInSeconds || 1,
+            maxAttempts: options.maxAttempts || 3
         };
      }
  }

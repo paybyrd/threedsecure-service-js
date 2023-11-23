@@ -59,7 +59,7 @@ export class LinearRetryPolicy implements IRetryPolicy {
                     });
                 }
                 attempt++;
-                await Delay.sleep(this._options.attemptDelay).wait();
+                await Delay.sleep(this._options.attemptDelayInSeconds * 1000).wait();
             } while (attempt <= this._options.maxAttempts);
 
             reject(lastError);
