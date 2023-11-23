@@ -14,7 +14,12 @@
     "strictNullChecks": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@paybyrd/logger-js": ["./node_modules/@paybyrd/logger-js"],
+      "@paybyrd/threedsecure-service-js/*": ["./src/*"],
+      "@paybyrd/http-client": ["./src/httpClients"]
+    }
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "example"]

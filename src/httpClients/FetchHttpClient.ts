@@ -1,4 +1,4 @@
-import { ILogger, LogLevel } from "../loggers/abstractions";
+import { ILogger, LogLevel } from "@paybyrd/logger-js";
 import { Stopwatch } from "../shared/utils/Stopwatch";
 import { IHttpClient, IHttpClientOptions, IRequest, IRetryPolicy } from "./abstractions";
 import { IResult } from "./abstractions/IResult";

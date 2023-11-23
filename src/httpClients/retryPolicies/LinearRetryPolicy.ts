@@ -1,4 +1,4 @@
-import { ILogger, LogLevel } from "../../loggers/abstractions";
+import { ILogger, LogLevel } from "@paybyrd/logger-js";
 import { IError } from "../../shared/abstractions";
 import { Delay } from "../../shared/utils";
 import { IRetryExecution, IRetryOptions, IRetryPolicy } from "../abstractions";
@@ -59,7 +59,7 @@ export class LinearRetryPolicy implements IRetryPolicy {
                     });
                 }
                 attempt++;
-                await Delay.sleep(this._options.attemptDelay).wait();
+                await Delay.sleep(this._options.attemptDelayInSeconds * 1000).wait();
             } while (attempt <= this._options.maxAttempts);
 
             reject(lastError);

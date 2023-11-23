@@ -1,5 +1,5 @@
 
 export interface IRetryOptions {
     maxAttempts: number;
-    attemptDelay: number;
+    attemptDelayInSeconds: number;
 }
