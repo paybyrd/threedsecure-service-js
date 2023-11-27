@@ -5,7 +5,7 @@ import { IAuthResponse, IChallengeService, IDirectoryServerService, IExecuteRequ
 import { IPreAuthResponse } from "./abstractions/IPreAuthResponse";
 import { IFrameChallengeService } from "./IFrameChallengeService";
 import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
-import { IObservable, IObserver, IEvent } from "../observer/abstractions";
+import { IObservable, IObserver, IEvent, EventName } from "../observer/abstractions";
 
  export class ThreeDSecureService implements IThreeDSecureService, IObservable {
     private readonly _options: IThreeDSecureOptions;
@@ -79,7 +79,7 @@ import { IObservable, IObserver, IEvent } from "../observer/abstractions";
             level: LogLevel.Information
         });
         this.notifyAll({
-            name: 'preAuth:started',
+            name: EventName.PreAuthStarted,
             data: request
         });
         const result = await this._client.send<IPreAuthResponse>({
@@ -91,7 +91,7 @@ import { IObservable, IObserver, IEvent } from "../observer/abstractions";
             correlationId: request.correlationId
         });
         this.notifyAll({
-            name: 'preAuth:completed',
+            name: EventName.PreAuthCompleted,
             data: result
         });
         return await result.getData();
@@ -106,7 +106,7 @@ import { IObservable, IObserver, IEvent } from "../observer/abstractions";
             level: LogLevel.Information
         });
         this.notifyAll({
-            name: 'auth:started',
+            name: EventName.AuthStarted,
             data: request
         });
         const result = await this._client.send<IAuthResponse>({
@@ -115,7 +115,7 @@ import { IObservable, IObserver, IEvent } from "../observer/abstractions";
             correlationId: request.correlationId
         });
         this.notifyAll({
-            name: 'auth:completed',
+            name: EventName.AuthCompleted,
             data: result
         });
         return await result.getData();
@@ -130,7 +130,7 @@ import { IObservable, IObserver, IEvent } from "../observer/abstractions";
             level: LogLevel.Information
         });
         this.notifyAll({
-            name: 'postAuth:completed',
+            name: EventName.PostAuthStarted,
             data: request
         });
         const result =  await this._client.send<IPostAuthResponse>({
@@ -139,7 +139,7 @@ import { IObservable, IObserver, IEvent } from "../observer/abstractions";
             correlationId: request.correlationId
         });
         this.notifyAll({
-            name: 'postAuth:completed',
+            name: EventName.PostAuthCompleted,
             data: result
         });
         return await result.getData();
@@ -147,12 +147,12 @@ import { IObservable, IObserver, IEvent } from "../observer/abstractions";
 
      private reset() : void {
         this.notifyAll({
-            name: 'reset:started'
+            name: EventName.ResetStarted
         });
         this._challenge.reset();
         this._directoryServer.reset();
         this.notifyAll({
-            name: 'reset:completed'
+            name: EventName.ResetCompleted
         });
      }
 
@@ -168,7 +168,7 @@ import { IObservable, IObserver, IEvent } from "../observer/abstractions";
             batchLogIntervalInSeconds: options.batchLogIntervalInSeconds || 5,
             service: {
                 name: 'Paybyrd.ThreeDSecure.JS',
-                version: '3.2.1'
+                version: '3.2.2'
             }
         };
      }
