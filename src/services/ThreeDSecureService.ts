@@ -164,11 +164,11 @@ import { IObservable, IObserver, IEvent } from "../observer/abstractions";
         return {
             restLoggerUrl: options.logUrl,
             timeoutInSeconds: options.timeoutInSeconds || 30,
-            environment: options.environment || 'Development',
+            environment: options.environment || 'Production',
             batchLogIntervalInSeconds: options.batchLogIntervalInSeconds || 5,
             service: {
                 name: 'Paybyrd.ThreeDSecure.JS',
-                version: '3.1.1'
+                version: '3.2.1'
             }
         };
      }

@@ -68,7 +68,7 @@ export class FetchHttpClient implements IHttpClient {
                         },
                         method: "send",
                         correlationId: request.correlationId,
-                        level: LogLevel.Error,
+                        level: LogLevel.Information,
                         elapsedTimeInMilliseconds: stopwatch.elapsed
                     });
                 }
