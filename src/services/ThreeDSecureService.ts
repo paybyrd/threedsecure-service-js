@@ -169,7 +169,7 @@ import { IObservable, IObserver, IEvent, EventName } from "../observer/abstracti
             batchLogIntervalInSeconds: options.batchLogIntervalInSeconds || 5,
             service: {
                 name: 'Paybyrd.ThreeDSecure.JS',
-                version: '3.2.3'
+                version: '3.2.4'
             }
         };
      }
