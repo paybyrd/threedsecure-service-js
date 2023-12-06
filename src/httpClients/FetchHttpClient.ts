@@ -94,7 +94,7 @@ export class FetchHttpClient implements IHttpClient {
                     isSuccess: response.ok,
                     isTransientError: this.isTransientError(response),
                     getData: async () => {
-                        const result = await response.json();
+                        const result = await response.clone().json();
                         return result.data as T;
                     }
                 };
