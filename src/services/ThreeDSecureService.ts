@@ -138,11 +138,12 @@ import { IObservable, IObserver, IEvent, EventName } from "../observer/abstracti
             method: 'POST',
             correlationId: request.correlationId
         });
+        const data = await result.getData();
         this.notifyAll({
             name: EventName.PostAuthCompleted,
-            data: result
+            data
         });
-        return await result.getData();
+        return data;
      }
 
      private reset() : void {
@@ -168,7 +169,7 @@ import { IObservable, IObserver, IEvent, EventName } from "../observer/abstracti
             batchLogIntervalInSeconds: options.batchLogIntervalInSeconds || 5,
             service: {
                 name: 'Paybyrd.ThreeDSecure.JS',
-                version: '3.2.2'
+                version: '3.2.3'
             }
         };
      }
