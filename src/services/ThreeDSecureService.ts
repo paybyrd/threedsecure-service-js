@@ -6,6 +6,7 @@ import { IPreAuthResponse } from "./abstractions/IPreAuthResponse";
 import { IFrameChallengeService } from "./IFrameChallengeService";
 import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
 import { IObservable, IObserver, IEvent, EventName } from "../observer/abstractions";
+import { v4 as uuidV4 } from "uuid";
 
  export class ThreeDSecureService implements IThreeDSecureService, IObservable {
     private readonly _options: IThreeDSecureOptions;
@@ -39,7 +40,7 @@ import { IObservable, IObserver, IEvent, EventName } from "../observer/abstracti
         }
      }
 
-     async execute(request: IExecuteRequest, correlationId = crypto.randomUUID()): Promise<IPostAuthResponse> {
+     async execute(request: IExecuteRequest, correlationId = uuidV4()): Promise<IPostAuthResponse> {
         if (!request.correlationId) {
             request.correlationId = correlationId;
             this._logger.log({
@@ -167,9 +168,10 @@ import { IObservable, IObserver, IEvent, EventName } from "../observer/abstracti
             timeoutInSeconds: options.timeoutInSeconds || 30,
             environment: options.environment || 'Production',
             batchLogIntervalInSeconds: options.batchLogIntervalInSeconds || 5,
+            minimumLevel: LogLevel.Information,
             service: {
                 name: 'Paybyrd.ThreeDSecure.JS',
-                version: '3.2.4'
+                version: '3.2.5'
             }
         };
      }
