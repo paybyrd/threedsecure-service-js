@@ -44,7 +44,7 @@
     "src"
   ],
   "devDependencies": {
-    "@paybyrd/logger-js": "^1.2.2-rc.1",
+    "@paybyrd/logger-js": "^1.2.2",
     "@types/uuid": "^9.0.8",
     "buffer": "^6.0.3",
     "live-server": "^1.2.2",
