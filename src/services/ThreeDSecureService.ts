@@ -168,6 +168,7 @@ import { v4 as uuidV4 } from "uuid";
             timeoutInSeconds: options.timeoutInSeconds || 30,
             environment: options.environment || 'Production',
             batchLogIntervalInSeconds: options.batchLogIntervalInSeconds || 5,
+            minimumLevel: LogLevel.Information,
             service: {
                 name: 'Paybyrd.ThreeDSecure.JS',
                 version: '3.2.4'
