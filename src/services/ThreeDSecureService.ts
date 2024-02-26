@@ -171,7 +171,7 @@ import { v4 as uuidV4 } from "uuid";
             minimumLevel: LogLevel.Information,
             service: {
                 name: 'Paybyrd.ThreeDSecure.JS',
-                version: '3.2.4'
+                version: '3.2.5'
             }
         };
      }
