@@ -1,7 +1,16 @@
 import { IHttpClient, FetchHttpClient, IHttpClientOptions } from "@paybyrd/http-client";
 import { ILogger, IRestLoggerOptions, LogLevel, RestLogger } from "@paybyrd/logger-js";
 import { Browser } from "../shared/utils";
-import { IAuthResponse, IChallengeService, IDirectoryServerService, IExecuteRequest, IPostAuthResponse, IThreeDSecureOptions, IThreeDSecureService } from "./abstractions";
+import {
+    IPreAuthRequest,
+    IAuthResponse,
+    IChallengeService,
+    IDirectoryServerService,
+    IExecuteRequest,
+    IPostAuthResponse,
+    IThreeDSecureOptions,
+    IThreeDSecureService
+} from "./abstractions";
 import { IPreAuthResponse } from "./abstractions/IPreAuthResponse";
 import { IFrameChallengeService } from "./IFrameChallengeService";
 import { IFrameDirectoryServerService } from "./IFrameDirectoryServerService";
@@ -40,7 +49,7 @@ import { v4 as uuidV4 } from "uuid";
         }
      }
 
-     async execute(request: IExecuteRequest, correlationId = uuidV4()): Promise<IPostAuthResponse> {
+     async execute(request: IPreAuthRequest, correlationId = uuidV4()): Promise<IPostAuthResponse> {
         if (!request.correlationId) {
             request.correlationId = correlationId;
             this._logger.log({
@@ -71,7 +80,7 @@ import { v4 as uuidV4 } from "uuid";
         }
      }
 
-     private async preAuth(request: IExecuteRequest): Promise<IPreAuthResponse> {
+     private async preAuth(request: IPreAuthRequest): Promise<IPreAuthResponse> {
         this._logger.log({
             message: 'Executing PreAuth',
             content: request,
@@ -87,6 +96,9 @@ import { v4 as uuidV4 } from "uuid";
             url: `${this._options.threeDSecureUrl}/api/v2/${request.id}/preAuth`,
             method: 'POST',
             body: {
+                customer: request.customer,
+                billingAddress: request.billingAddress,
+                shippingAddress: request.shippingAddress,
                 browser: Browser.create()
             },
             correlationId: request.correlationId
@@ -171,7 +183,7 @@ import { v4 as uuidV4 } from "uuid";
             minimumLevel: LogLevel.Information,
             service: {
                 name: 'Paybyrd.ThreeDSecure.JS',
-                version: '3.2.5'
+                version: '3.3.0'
             }
         };
      }

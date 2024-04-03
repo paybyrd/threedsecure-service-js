@@ -12,3 +12,6 @@ export { IPostAuthRequest } from "./IPostAuthRequest";
 export { IPostAuthResponse } from "./IPostAuthResponse";
 export { IThreeDSecureOptions } from "./IThreeDSecureOptions";
 export { IThreeDSecureService } from "./IThreeDSecureService";
+export { IPreAuthRequest } from "./IPreAuthRequest";
+export { IAddress } from "./IAddress";
+export { ICustomer, IPhone } from "./ICustomer";
