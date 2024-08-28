@@ -130,8 +130,6 @@ graph
 
 Here, the client should integrate their checkout with 3DS JS.
 
-Below, we will list only primary steps.
-
 ```mermaid
 
 graph
