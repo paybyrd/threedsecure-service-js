@@ -8,7 +8,8 @@ export interface IPostAuthResponse {
         aav?: string,
         dsTransactionId?: string,
         eci?: string,
-        verificationMethod: "None"|"ThreeDSecure"
+        verificationMethod: "None"|"ThreeDSecure",
+        protocolVersion?: string
     },
     code?: string,
     message?: string,
