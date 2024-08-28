@@ -93,6 +93,75 @@ try {
 }
 ```
 
-## Flow
+## Main flow
 
-![3DS flow](./images/3DS-flow.svg)
+In the main flow, Paybyrd will deal with everystep.
+
+```mermaid
+
+graph
+    subgraph ClientServer[Client server]
+        PaymentAPI[Payment API]
+    end
+    subgraph Customer device
+        3DSPage[3DS page]
+        ThreeDSecureJS
+    end
+    subgraph Paybyrd
+        GatewayAPI[Gateway]
+        3DSAPI[3DS API]
+    end
+    subgraph ACS
+        Bank
+    end
+
+    PaymentAPI --> |1. Create payment*|GatewayAPI
+    PaymentAPI --> |2. Redirects customer to 3DS page|3DSPage
+    3DSPage[3DS page] --> |3. Executes 3DS flow|ThreeDSecureJS
+    ThreeDSecureJS --> |4. Authenticate card| Bank
+    Bank --> |5. Notifies authentication status|3DSAPI
+    3DSAPI --> |6. Executes payment|GatewayAPI
+    GatewayAPI --> |7. Notifies payment status|ClientServer
+```
+
+> The Gateway will return an redirect URL in order to execute the 3DS flow.
+
+## Self checkout
+
+Here, the client should integrate their checkout with 3DS JS.
+
+Below, we will list only primary steps.
+
+```mermaid
+
+graph
+    subgraph ClientServer[Client server]
+        PaymentAPI[Payment API]
+    end
+    subgraph Customer device
+        Checkout
+        ThreeDSecureJS
+    end
+    subgraph Paybyrd
+        GatewayAPI[Gateway]
+        3DSAPI[3DS API]
+    end
+    subgraph Internet
+        Customer
+    end
+    subgraph ACS
+        Bank
+    end
+
+    PaymentAPI --> |1. Create payment*|GatewayAPI
+    PaymentAPI --> |2. Send self checkout URL|Customer
+    Customer --> |3. Access checkout page|Checkout
+    Checkout --> |4. Executes 3DS flow|ThreeDSecureJS
+    ThreeDSecureJS --> |5. Authenticate card| Bank
+    Bank --> |6. Notifies authentication status|3DSAPI
+    3DSAPI --> |7. Executes payment|GatewayAPI
+    GatewayAPI --> |8. Notifies payment status|ClientServer
+```
+
+> The Gateway will return a ThreeDSecure node with an id on it.
+> This id should be passed to the 3DS JS to start the process.
