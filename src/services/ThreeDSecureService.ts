@@ -99,7 +99,7 @@ import { v4 as uuidV4 } from "uuid";
                 customer: request.customer,
                 billingAddress: request.billingAddress,
                 shippingAddress: request.shippingAddress,
-                browser: Browser.create()
+                browser: Browser.create(this._options.culture)
             },
             correlationId: request.correlationId
         });

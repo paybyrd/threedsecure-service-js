@@ -1,13 +1,13 @@
 import { IBrowser } from "../abstractions";
 
 export class Browser {
-    static create(): IBrowser {
+    static create(culture?: string): IBrowser {
         const allowedBrowserColorDepth = [48, 32, 24, 16, 15, 8, 4, 1];
         const colorDepth = allowedBrowserColorDepth.find(x => x <= screen.colorDepth)!;
         return {
             javaEnabled: navigator.javaEnabled(),
             javascriptEnabled: true,
-            language: navigator.language,
+            language: (culture || navigator.language).replace(/^([a-zA-Z]+-[a-zA-Z]+)-.+$/, '$1'),
             userAgent: navigator.userAgent,
             screenWidth: window.screen.width,
             screenHeight: window.screen.height,
